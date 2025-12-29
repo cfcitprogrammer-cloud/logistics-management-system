@@ -1,11 +1,14 @@
 import * as z from "zod";
 
 export const itemDataSchema = z.object({
-  materialNumber: z.string().nonempty("Material Number is required"),
-  itemDescription: z.string().nonempty("Item Description is required"),
-  quantity: z.number().min(1, "Quantity must be at least 1"),
-  unitOfMeasure: z.string().nonempty("Unit of Measure is required"),
-  unitPrice: z.number().min(0, "Unit Price cannot be negative"),
+  materialNumber: z.string().nonempty("Material Number is required").optional(),
+  itemDescription: z
+    .string()
+    .nonempty("Item Description is required")
+    .optional(),
+  quantity: z.number().min(1, "Quantity must be at least 1").optional(),
+  unitOfMeasure: z.string().nonempty("Unit of Measure is required").optional(),
+  unitPrice: z.number().min(0, "Unit Price cannot be negative").optional(),
 });
 
 export const purchaseOrderSchema = z.object({
@@ -18,8 +21,10 @@ export const purchaseOrderSchema = z.object({
   recipientName: z.string().nonempty("Recipient Name is required"),
   deliveryDate: z.string().nonempty("Delivery Date is required"),
   deliveryAddress: z.string().nonempty("Delivery Address is required"),
-  itemData: z.array(itemDataSchema).min(1, "At least one item is required"),
+  itemData: z
+    .array(itemDataSchema.optional())
+    .min(1, "At least one item is required"),
   remarks: z.string().max(500, "Limit Reached").optional(),
 
-  currentItem: itemDataSchema,
+  currentItem: itemDataSchema.optional(),
 });

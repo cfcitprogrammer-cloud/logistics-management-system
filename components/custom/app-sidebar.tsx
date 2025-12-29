@@ -58,11 +58,11 @@ const data = {
   ],
 
   navOperations: [
-    {
-      title: "Calendar",
-      url: "/d/calendar",
-      icon: Calendar,
-    },
+    // {
+    //   title: "Calendar",
+    //   url: "/d/calendar",
+    //   icon: Calendar,
+    // },
     {
       title: "Shipments",
       url: "/d/shipments",
@@ -142,10 +142,10 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <NavSecondary items={data.navAssets} title="Assets & Resources" />
 
         {/* Finance */}
-        <NavSecondary items={data.navFinance} title="Finance" />
+        {/* <NavSecondary items={data.navFinance} title="Finance" /> */}
 
         {/* Secondary / Utility */}
-        <NavSecondary items={data.navSecondary} title="System" />
+        {/* <NavSecondary items={data.navSecondary} title="System" /> */}
       </SidebarContent>
       <SidebarFooter>
         <NavUser user={data.user} />
