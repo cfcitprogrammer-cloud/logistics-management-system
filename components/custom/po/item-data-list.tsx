@@ -35,18 +35,28 @@ export default function ItemDataList({
     name: "itemData",
   });
 
+  function saveItem() {
+    if (editingIndex !== null) {
+      update(editingIndex, {
+        materialNumber: materialNumber,
+        itemDescription: itemDescription,
+        quantity: quantity,
+        unitOfMeasure: unitOfMeasure,
+        unitPrice: unitPrice,
+      });
+      setEditingIndex(null);
+    }
+    clearCurrentItem();
+  }
+
   function editItem(index: number) {
     const item = fields[index];
     setEditingIndex(index);
-
-    // Populate the form with the item values to allow editing
-    form.setValue("currentItem", {
-      materialNumber: item.materialNumber,
-      itemDescription: item.itemDescription,
-      quantity: item.quantity,
-      unitOfMeasure: item.unitOfMeasure,
-      unitPrice: item.unitPrice,
-    });
+    setMaterialNumber(item.materialNumber || "");
+    setItemDescription(item.itemDescription || "");
+    setQuantity(item.quantity || 0);
+    setUnitOfMeasure(item.unitOfMeasure || "");
+    setUnitPrice(item.unitPrice || 0);
   }
 
   function deleteItem(index: number) {
@@ -63,16 +73,6 @@ export default function ItemDataList({
     });
 
     clearCurrentItem();
-  }
-
-  function saveEdit() {
-    if (editingIndex !== null) {
-      const updatedItem = form.getValues("currentItem");
-
-      update(editingIndex, updatedItem);
-      setEditingIndex(null);
-      clearCurrentItem();
-    }
   }
 
   function clearCurrentItem() {
@@ -148,8 +148,12 @@ export default function ItemDataList({
           </Field>
         </div>
 
-        <Button type="button" className="w-full" onClick={addItem}>
-          Add Item
+        <Button
+          type="button"
+          className="w-full"
+          onClick={editingIndex !== null ? saveItem : addItem}
+        >
+          {editingIndex !== null ? "Update Item" : "Add Item"}
         </Button>
 
         <Table>
