@@ -24,14 +24,7 @@ export default function NewPurchaseOrderPage() {
       deliveryAddress: "",
       itemData: [],
       remarks: "",
-
-      currentItem: {
-        materialNumber: "",
-        itemDescription: "",
-        quantity: 1,
-        unitOfMeasure: "",
-        unitPrice: 0,
-      },
+      file: "",
     },
   });
 
@@ -133,6 +126,31 @@ export default function NewPurchaseOrderPage() {
                         aria-invalid={fieldState.invalid}
                         autoComplete="off"
                         placeholder="John Doe"
+                        className="bg-slate-100"
+                      />
+                      {fieldState.invalid && (
+                        <FieldError errors={[fieldState.error]} />
+                      )}
+                    </Field>
+                  )}
+                />
+
+                <Controller
+                  name="file"
+                  control={form.control}
+                  render={({ field, fieldState }) => (
+                    <Field
+                      data-invalid={fieldState.invalid}
+                      className="col-span-full"
+                    >
+                      <FieldLabel htmlFor={field.name}>
+                        PO Attachment
+                      </FieldLabel>
+                      <Input
+                        {...field}
+                        type="file"
+                        accept=".doc, .docx, .pdf"
+                        id={field.name}
                         className="bg-slate-100"
                       />
                       {fieldState.invalid && (
