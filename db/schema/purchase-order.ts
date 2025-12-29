@@ -25,6 +25,4 @@ export const purchaseOrderSchema = z.object({
     .array(itemDataSchema.optional())
     .min(1, "At least one item is required"),
   remarks: z.string().max(500, "Limit Reached").optional(),
-
-  currentItem: itemDataSchema.optional(),
 });

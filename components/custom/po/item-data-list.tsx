@@ -23,6 +23,12 @@ export default function ItemDataList({
 }: {
   form: UseFormReturn<FormData>;
 }) {
+  const [materialNumber, setMaterialNumber] = useState("");
+  const [itemDescription, setItemDescription] = useState("");
+  const [quantity, setQuantity] = useState(0);
+  const [unitOfMeasure, setUnitOfMeasure] = useState("");
+  const [unitPrice, setUnitPrice] = useState(0);
+
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
   const { fields, append, remove, update } = useFieldArray({
     control: form.control,
@@ -49,11 +55,11 @@ export default function ItemDataList({
 
   function addItem() {
     append({
-      materialNumber: form.getValues("currentItem.materialNumber"),
-      itemDescription: form.getValues("currentItem.itemDescription"),
-      quantity: form.getValues("currentItem.quantity"),
-      unitOfMeasure: form.getValues("currentItem.unitOfMeasure"),
-      unitPrice: form.getValues("currentItem.unitPrice"),
+      materialNumber: materialNumber,
+      itemDescription: itemDescription,
+      quantity: quantity,
+      unitOfMeasure: unitOfMeasure,
+      unitPrice: unitPrice,
     });
 
     clearCurrentItem();
@@ -70,135 +76,80 @@ export default function ItemDataList({
   }
 
   function clearCurrentItem() {
-    form.setValue("currentItem", {
-      materialNumber: "",
-      itemDescription: "",
-      quantity: 0,
-      unitOfMeasure: "",
-      unitPrice: 0,
-    });
+    setMaterialNumber("");
+    setItemDescription("");
+    setQuantity(0);
+    setUnitOfMeasure("");
+    setUnitPrice(0);
   }
 
   return (
     <Card>
       <CardContent className="space-y-4">
-        <Controller
-          name="currentItem.materialNumber"
-          control={form.control}
-          render={({ field, fieldState }) => (
-            <Field data-invalid={fieldState.invalid} className="col-span-full">
-              <FieldLabel htmlFor={field.name}>Material Number</FieldLabel>
-              <Input
-                {...field}
-                id={field.name}
-                aria-invalid={fieldState.invalid}
-                autoComplete="off"
-                placeholder="John Doe"
-                className="bg-slate-100"
-              />
-              {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
-            </Field>
-          )}
-        />
+        <Field className="col-span-full">
+          <FieldLabel htmlFor="materialNumber">Material Number</FieldLabel>
+          <Input
+            id="materialNumber"
+            autoComplete="off"
+            placeholder="John Doe"
+            className="bg-slate-100"
+            value={materialNumber}
+            onChange={(e) => setMaterialNumber(e.target.value)}
+          />
+        </Field>
 
-        <Controller
-          name="currentItem.itemDescription"
-          control={form.control}
-          render={({ field, fieldState }) => (
-            <Field data-invalid={fieldState.invalid} className="col-span-full">
-              <FieldLabel htmlFor={field.name}>Item Description</FieldLabel>
-              <Input
-                {...field}
-                id={field.name}
-                aria-invalid={fieldState.invalid}
-                autoComplete="off"
-                placeholder="John Doe"
-                className="bg-slate-100"
-              />
-              {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
-            </Field>
-          )}
-        />
+        <Field className="col-span-full">
+          <FieldLabel htmlFor="itemDescription">Item Description</FieldLabel>
+          <Input
+            id="itemDescription"
+            autoComplete="off"
+            placeholder="John Doe"
+            className="bg-slate-100"
+            value={itemDescription}
+            onChange={(e) => setItemDescription(e.target.value)}
+          />
+        </Field>
 
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <Controller
-              name="currentItem.quantity"
-              control={form.control}
-              render={({ field, fieldState }) => (
-                <Field
-                  data-invalid={fieldState.invalid}
-                  className="col-span-full"
-                >
-                  <FieldLabel htmlFor={field.name}>Quantity</FieldLabel>
-                  <Input
-                    {...field}
-                    id={field.name}
-                    aria-invalid={fieldState.invalid}
-                    autoComplete="off"
-                    placeholder="John Doe"
-                    className="bg-slate-100"
-                  />
-                  {fieldState.invalid && (
-                    <FieldError errors={[fieldState.error]} />
-                  )}
-                </Field>
-              )}
+        <div className="grid grid-cols-3 gap-2">
+          <Field>
+            <FieldLabel htmlFor="qty">Qty</FieldLabel>
+            <Input
+              id="qty"
+              autoComplete="off"
+              placeholder="John Doe"
+              className="bg-slate-100"
+              value={quantity}
+              onChange={(e) => setQuantity(Number(e.target.value))}
             />
-          </div>
+          </Field>
 
-          <div>
-            <Controller
-              name="currentItem.unitOfMeasure"
-              control={form.control}
-              render={({ field, fieldState }) => (
-                <Field
-                  data-invalid={fieldState.invalid}
-                  className="col-span-full"
-                >
-                  <FieldLabel htmlFor={field.name}>Unit of Measure</FieldLabel>
-                  <Input
-                    {...field}
-                    id={field.name}
-                    aria-invalid={fieldState.invalid}
-                    autoComplete="off"
-                    placeholder="John Doe"
-                    className="bg-slate-100"
-                  />
-                  {fieldState.invalid && (
-                    <FieldError errors={[fieldState.error]} />
-                  )}
-                </Field>
-              )}
+          <Field>
+            <FieldLabel htmlFor="uom">Unit of Measure</FieldLabel>
+            <Input
+              id="uom"
+              autoComplete="off"
+              placeholder="John Doe"
+              className="bg-slate-100"
+              value={unitOfMeasure}
+              onChange={(e) => setUnitOfMeasure(e.target.value)}
             />
-          </div>
+          </Field>
+
+          <Field>
+            <FieldLabel htmlFor="unitPrice">Unit Price</FieldLabel>
+            <Input
+              id="unitPrice"
+              autoComplete="off"
+              placeholder="John Doe"
+              className="bg-slate-100"
+              value={unitPrice}
+              onChange={(e) => setUnitPrice(Number(e.target.value))}
+            />
+          </Field>
         </div>
 
-        <Controller
-          name="currentItem.unitPrice"
-          control={form.control}
-          render={({ field, fieldState }) => (
-            <Field data-invalid={fieldState.invalid} className="col-span-full">
-              <FieldLabel htmlFor={field.name}>Unit Price</FieldLabel>
-              <Input
-                {...field}
-                id={field.name}
-                aria-invalid={fieldState.invalid}
-                autoComplete="off"
-                placeholder="John Doe"
-                className="bg-slate-100"
-              />
-              {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
-            </Field>
-          )}
-        />
-
-        <Button
-          type="button"
-          className="w-full"
-          onClick={editingIndex !== null ? saveEdit : addItem}
-        >
-          {editingIndex !== null ? "Save Item" : "Add Item"}
+        <Button type="button" className="w-full" onClick={addItem}>
+          Add Item
         </Button>
 
         <Table>
