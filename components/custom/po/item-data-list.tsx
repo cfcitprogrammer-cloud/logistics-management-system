@@ -179,14 +179,14 @@ export default function ItemDataList({
                 <TableCell>{item.quantity}</TableCell>
                 <TableCell>{item.unitOfMeasure}</TableCell>
                 <TableCell className="text-right">{item.unitPrice}</TableCell>
-                <TableCell>
+                <TableCell className="flex gap-1">
                   <Button
                     size={"sm"}
                     type="button"
                     onClick={() => editItem(index)}
                   >
                     <Pencil />
-                  </Button>{" "}
+                  </Button>
                   <Button
                     size={"sm"}
                     type="button"
