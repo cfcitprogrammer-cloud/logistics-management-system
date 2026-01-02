@@ -2,12 +2,18 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Mail, Phone, Truck } from "lucide-react";
+import { generateIdenteapot } from "@teapotlabs/identeapots";
 
 export default function DriverCard() {
+  //   const identicon: string = generateIdenteapot("hello world", "salt");
+
   return (
     <Card>
       <CardContent className="space-y-4">
         <header className="text-center space-y-2">
+          <div className="mx-auto w-[100px] h-[100px]">
+            {/* <img src={identicon} /> */}
+          </div>
           <h2 className="text-xl font-semibold">John Doe</h2>
           <div className="flex justify-center gap-2">
             <Badge variant={"outline"}>DVR001</Badge>
