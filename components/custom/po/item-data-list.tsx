@@ -15,6 +15,7 @@ import { UseFormReturn, useFieldArray } from "react-hook-form";
 import { purchaseOrderSchema } from "@/db/schema/purchase-order";
 import * as z from "zod";
 import { useState } from "react";
+import { Pencil, Trash2 } from "lucide-react";
 
 type FormData = z.infer<typeof purchaseOrderSchema>;
 
@@ -184,15 +185,14 @@ export default function ItemDataList({
                     type="button"
                     onClick={() => editItem(index)}
                   >
-                    Edit
+                    <Pencil />
                   </Button>{" "}
-                  |{" "}
                   <Button
                     size={"sm"}
                     type="button"
                     onClick={() => deleteItem(index)}
                   >
-                    Delete
+                    <Trash2 />
                   </Button>
                 </TableCell>
               </TableRow>

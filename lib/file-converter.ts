@@ -3,7 +3,13 @@ export function filetobase64(file: File): Promise<string> {
     const reader = new FileReader();
 
     reader.onloadend = () => {
-      resolve(reader.result as string);
+      if (typeof reader.result === "string") {
+        // Strip the prefix "data:<mime-type>;base64,"
+        const base64 = reader.result.split(",")[1];
+        resolve(base64);
+      } else {
+        reject(new Error("File reading failed."));
+      }
     };
 
     reader.onerror = () => {
