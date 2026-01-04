@@ -17,13 +17,11 @@ export const purchaseOrderSchema = z.object({
     .nonempty("PO Number is required")
     .max(100, "Limit Reached"),
   issueDate: z.string().nonempty("Issue Date is required"),
-  supplierName: z.string().nonempty("Supplier Name is required"),
-  recipientName: z.string().nonempty("Recipient Name is required"),
-  deliveryDate: z.string().nonempty("Delivery Date is required"),
-  deliveryAddress: z.string().nonempty("Delivery Address is required"),
-  itemData: z
-    .array(itemDataSchema.optional())
-    .min(1, "At least one item is required"),
+  supplierName: z.string().optional(),
+  recipientName: z.string().optional(),
+  deliveryDate: z.string().optional(),
+  deliveryAddress: z.string().optional(),
+  itemData: z.array(itemDataSchema.optional()).optional(),
   remarks: z.string().max(500, "Limit Reached").optional(),
   file: z.any().optional(),
 });

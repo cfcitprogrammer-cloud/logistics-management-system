@@ -1,3 +1,5 @@
+"use client";
+
 import Stat from "@/components/custom/stat";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -9,14 +11,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import {
   InputGroup,
   InputGroupAddon,
@@ -33,15 +27,79 @@ import {
   Search,
   Truck,
 } from "lucide-react";
+import { useEffect, useState } from "react";
+import axios from "axios";
+
+type Shipment = {
+  ID: string;
+  "PO ID": string;
+  "FLEET ID": string;
+  "DRIVER ID": string;
+  FROM: string;
+  TO: string;
+  "EXPECTED DELIVERY DATE": string;
+  "ACTUAL DELIVERY DATE": string;
+  "CURRENT LOCATION": string;
+  REMARKS: string;
+  STATUS: string;
+};
 
 export default function ShipmentsPage() {
+  const [shipments, setShipments] = useState<Shipment[]>([]);
+
+  async function getAllShipments() {
+    try {
+      const url = process.env.NEXT_PUBLIC_GAS_LINK || "";
+
+      const res = await axios.get(url, {
+        params: {
+          action: "shipment",
+          path: "get-all-shipments",
+          page: 1,
+          limit: 50,
+        },
+      });
+
+      setShipments(res.data?.data || []);
+    } catch (err) {
+      console.error("Error fetching shipments:", err);
+      setShipments([]);
+    }
+  }
+
+  useEffect(() => {
+    getAllShipments();
+  }, []);
+
   return (
     <section className="space-y-4">
       <header className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2">
-        <Stat title="Total Shipments" icon={Truck} value="1,300" />
-        <Stat title="Pending" icon={ClockFading} value="100" />
-        <Stat title="Delivery" icon={Package} value="1,000" />
-        <Stat title="Completed" icon={PackageCheck} value="100" />
+        <Stat
+          title="Total Shipments"
+          icon={Truck}
+          value={shipments.length.toString()}
+        />
+        <Stat
+          title="Pending"
+          icon={ClockFading}
+          value={shipments
+            .filter((s) => s.STATUS === "Pending")
+            .length.toString()}
+        />
+        <Stat
+          title="Delivery"
+          icon={Package}
+          value={shipments
+            .filter((s) => s.STATUS === "In Transit")
+            .length.toString()}
+        />
+        <Stat
+          title="Completed"
+          icon={PackageCheck}
+          value={shipments
+            .filter((s) => s.STATUS === "Delivered")
+            .length.toString()}
+        />
       </header>
 
       <Tabs defaultValue="all">
@@ -61,78 +119,67 @@ export default function ShipmentsPage() {
             </InputGroupAddon>
           </InputGroup>
 
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant={"secondary"}>Card View</Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuLabel>View Options</DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem>List View</DropdownMenuItem>
-              <DropdownMenuItem>Card View</DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-
           <Button>New Shipment</Button>
         </div>
 
         <TabsContent
           value="all"
-          className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3"
+          className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4"
         >
-          {/* card view sample */}
-          <Card>
-            <CardHeader>
-              <CardTitle>#SH9283746</CardTitle>
-              <CardDescription>
-                <Badge>In Transit</Badge>
-              </CardDescription>
+          {shipments.map((shipment) => (
+            <Card key={shipment.ID}>
+              <CardHeader>
+                <CardTitle>#{shipment.ID}</CardTitle>
+                <CardDescription>
+                  <Badge>{shipment.STATUS}</Badge>
+                </CardDescription>
+                <CardAction>
+                  <Button variant={"ghost"}>
+                    <Ellipsis />
+                  </Button>
+                </CardAction>
+              </CardHeader>
 
-              <CardAction>
-                <Button variant={"ghost"}>
-                  <Ellipsis />
-                </Button>
-              </CardAction>
-            </CardHeader>
+              <CardContent className="space-y-2">
+                <Separator className="mb-2" />
 
-            <CardContent className="space-y-2">
-              <Separator className="mb-5" />
+                <div>
+                  <h1 className="text-sm font-semibold">
+                    PO: {shipment["PO ID"]}
+                  </h1>
+                  <p className="text-sm">Fleet: {shipment["FLEET ID"]}</p>
+                </div>
 
-              <div>
-                <h1 className="text-sm font-semibold">TechGear Inc.</h1>
-                <p className="text-sm">hihsd</p>
-              </div>
-
-              <div className="bg-gray-300 p-2 space-y-2 rounded">
-                <div className="flex justify-between items-start text-sm">
-                  <p>Origin</p>
-
-                  <div>
-                    <h2 className="font-semibold">Manila, PH</h2>
-                    <p>June 15, 2023 - 12:00 PM</p>
+                <div className="bg-gray-100 p-2 space-y-2 rounded">
+                  <div className="flex justify-between items-start text-sm">
+                    <p>Origin</p>
+                    <div>
+                      <h2 className="font-semibold">{shipment.FROM}</h2>
+                      <p>{shipment["EXPECTED DELIVERY DATE"]}</p>
+                    </div>
+                  </div>
+                  <div className="flex justify-between items-start text-sm">
+                    <p>Destination</p>
+                    <div>
+                      <h2 className="font-semibold">{shipment.TO}</h2>
+                      <p>{shipment["ACTUAL DELIVERY DATE"] || "N/A"}</p>
+                    </div>
                   </div>
                 </div>
-                <div className="flex justify-between items-start text-sm">
-                  <p>Destination</p>
 
-                  <div>
-                    <h2 className="font-semibold">Manila, PH</h2>
-                    <p>June 15, 2023 - 12:00 PM</p>
-                  </div>
+                <div className="flex justify-between">
+                  <p>
+                    <strong>Current Location:</strong>{" "}
+                    {shipment["CURRENT LOCATION"]}
+                  </p>
+                  <p>
+                    <strong>Remarks:</strong> {shipment.REMARKS || "-"}
+                  </p>
                 </div>
-              </div>
-
-              <div className="flex justify-between">
-                <p>
-                  <strong>Progress:</strong> 60%
-                </p>
-                <p>
-                  <strong>Carrier:</strong> FedEx
-                </p>
-              </div>
-              <Progress value={60} />
-            </CardContent>
-          </Card>
+                <Progress value={Math.floor(Math.random() * 100)} />
+              </CardContent>
+            </Card>
+          ))}
         </TabsContent>
       </Tabs>
     </section>

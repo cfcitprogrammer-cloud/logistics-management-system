@@ -92,7 +92,7 @@ export default function ItemDataList({
           <Input
             id="materialNumber"
             autoComplete="off"
-            placeholder="John Doe"
+            placeholder="MTR252"
             className="bg-slate-100"
             value={materialNumber}
             onChange={(e) => setMaterialNumber(e.target.value)}
@@ -104,7 +104,7 @@ export default function ItemDataList({
           <Input
             id="itemDescription"
             autoComplete="off"
-            placeholder="John Doe"
+            placeholder="Canned Goods"
             className="bg-slate-100"
             value={itemDescription}
             onChange={(e) => setItemDescription(e.target.value)}
@@ -129,7 +129,7 @@ export default function ItemDataList({
             <Input
               id="uom"
               autoComplete="off"
-              placeholder="John Doe"
+              placeholder="piece"
               className="bg-slate-100"
               value={unitOfMeasure}
               onChange={(e) => setUnitOfMeasure(e.target.value)}
@@ -158,7 +158,7 @@ export default function ItemDataList({
         </Button>
 
         <Table>
-          <TableCaption>A list of your recent invoices.</TableCaption>
+          <TableCaption>A list of your PO Items</TableCaption>
           <TableHeader>
             <TableRow>
               <TableHead className="w-[100px]">Material Number</TableHead>

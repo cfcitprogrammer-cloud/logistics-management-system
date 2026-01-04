@@ -11,10 +11,12 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import ItemDataList from "@/components/custom/po/item-data-list";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { filetobase64 } from "@/lib/file-converter";
+import { Spinner } from "@/components/ui/spinner";
 
 export default function NewPurchaseOrderPage() {
+  const [loading, setLoading] = useState(false);
   const form = useForm<z.infer<typeof purchaseOrderSchema>>({
     resolver: zodResolver(purchaseOrderSchema),
     defaultValues: {
@@ -31,6 +33,8 @@ export default function NewPurchaseOrderPage() {
   });
 
   async function onSubmit(data: z.infer<typeof purchaseOrderSchema>) {
+    setLoading(true);
+
     try {
       console.log("Form data ready for submission:", data);
 
@@ -49,6 +53,9 @@ export default function NewPurchaseOrderPage() {
       console.log("Upload result:", result);
     } catch (err) {
       console.error("Form submission failed:", err);
+      alert("Something went wrong. PO not submitted.");
+    } finally {
+      setLoading(false);
     }
   }
 
@@ -289,8 +296,8 @@ export default function NewPurchaseOrderPage() {
             </CardContent>
 
             <CardFooter>
-              <Button type="submit" className="w-full">
-                Create Purchase Order
+              <Button type="submit" className="w-full" disabled={loading}>
+                {loading ? <Spinner /> : "Create Purchase Order"}
               </Button>
             </CardFooter>
           </Card>

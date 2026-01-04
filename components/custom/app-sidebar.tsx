@@ -37,11 +37,11 @@ const data = {
     avatar: "/avatars/shadcn.jpg",
   },
   navMain: [
-    {
-      title: "Dashboard",
-      url: "/d/dashboard",
-      icon: LayoutDashboard,
-    },
+    // {
+    //   title: "Dashboard",
+    //   url: "/d/dashboard",
+    //   icon: LayoutDashboard,
+    // },
   ],
 
   navOrders: [
@@ -50,11 +50,11 @@ const data = {
       url: "/d/purchase-orders",
       icon: FileText,
     },
-    {
-      title: "Approvals",
-      url: "/d/approvals",
-      icon: CheckCircle,
-    },
+    // {
+    //   title: "Approvals",
+    //   url: "/d/approvals",
+    //   icon: CheckCircle,
+    // },
   ],
 
   navOperations: [
@@ -68,19 +68,19 @@ const data = {
       url: "/d/shipments",
       icon: Truck,
     },
-    {
-      title: "Tracking",
-      url: "/d/tracking",
-      icon: Route,
-    },
+    // {
+    //   title: "Tracking",
+    //   url: "/d/tracking",
+    //   icon: Route,
+    // },
   ],
 
   navAssets: [
-    {
-      title: "Warehouse",
-      url: "/d/warehouse",
-      icon: Warehouse,
-    },
+    // {
+    //   title: "Warehouse",
+    //   url: "/d/warehouse",
+    //   icon: Warehouse,
+    // },
     {
       title: "Fleet",
       url: "/d/fleet",

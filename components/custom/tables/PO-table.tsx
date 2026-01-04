@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import {
   ColumnDef,
   flexRender,
@@ -15,38 +16,50 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { useEffect, useState } from "react";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
-  onSelect?: (row: TData | null) => void; // callback for selected row
+  onSelect?: (row: TData | null) => void;
+  renderActions?: (row: TData) => React.ReactNode;
 }
 
 export function POTable<TData, TValue>({
   columns,
   data,
   onSelect,
+  renderActions,
 }: DataTableProps<TData, TValue>) {
-  // single row selection state
-  const [rowSelection, setRowSelection] = useState<{ [key: string]: boolean }>(
-    {}
-  );
+  const [rowSelection, setRowSelection] = useState<Record<string, boolean>>({});
+
+  const actionColumn: ColumnDef<TData> | null = renderActions
+    ? {
+        id: "actions",
+        header: "Actions",
+        cell: ({ row }) => (
+          <div
+            className="flex gap-2"
+            onClick={(e) => e.stopPropagation()} // prevent row selection
+          >
+            {renderActions(row.original)}
+          </div>
+        ),
+      }
+    : null;
 
   const table = useReactTable({
     data,
-    columns,
+    columns: actionColumn ? [...columns, actionColumn] : columns,
     getCoreRowModel: getCoreRowModel(),
     state: {
       rowSelection,
     },
     onRowSelectionChange: (newSelection) => {
-      // keep only the last selected row
       const lastSelectedId = Object.keys(newSelection).pop();
       const singleSelection = lastSelectedId ? { [lastSelectedId]: true } : {};
+
       setRowSelection(singleSelection);
 
-      // call the callback with the selected row data
       if (onSelect) {
         const selectedRow = lastSelectedId
           ? table.getRow(lastSelectedId)?.original
@@ -54,7 +67,7 @@ export function POTable<TData, TValue>({
         onSelect(selectedRow ?? null);
       }
     },
-    getRowId: (row) => (row as any).ID?.toString() || "", // adjust if your rows have a unique ID
+    getRowId: (row) => (row as any).ID?.toString() ?? "",
   });
 
   return (
@@ -76,15 +89,15 @@ export function POTable<TData, TValue>({
             </TableRow>
           ))}
         </TableHeader>
+
         <TableBody>
-          {table.getRowModel().rows?.length ? (
+          {table.getRowModel().rows.length ? (
             table.getRowModel().rows.map((row) => (
               <TableRow
                 key={row.id}
-                data-state={rowSelection[row.id] ? "selected" : undefined}
                 className="cursor-pointer"
+                data-state={rowSelection[row.id] ? "selected" : undefined}
                 onClick={() => {
-                  // toggle selection
                   const isSelected = rowSelection[row.id];
                   const newSelection = isSelected ? {} : { [row.id]: true };
                   setRowSelection(newSelection);
@@ -100,7 +113,10 @@ export function POTable<TData, TValue>({
             ))
           ) : (
             <TableRow>
-              <TableCell colSpan={columns.length} className="h-24 text-center">
+              <TableCell
+                colSpan={columns.length + (actionColumn ? 1 : 0)}
+                className="h-24 text-center"
+              >
                 No results.
               </TableCell>
             </TableRow>
