@@ -192,9 +192,6 @@ export default function NewPurchaseOrderPage() {
                               type: file.type,
                               content: base64,
                             });
-
-                            // Optional: clear input to avoid reuse issues
-                            e.target.value = "";
                           } catch (err) {
                             console.error("File reading failed:", err);
                           }
