@@ -167,14 +167,34 @@ export default function ShipmentsPage() {
                       <p>Origin</p>
                       <div>
                         <h2 className="font-semibold">{shipment.FROM}</h2>
-                        <p>{shipment["EXPECTED DELIVERY DATE"]}</p>
+                        <p>
+                          {shipment["EXPECTED DELIVERY DATE"]
+                            ? new Date(
+                                shipment["EXPECTED DELIVERY DATE"]
+                              ).toLocaleDateString("en-US", {
+                                year: "numeric",
+                                month: "long",
+                                day: "numeric",
+                              })
+                            : "N/A"}
+                        </p>
                       </div>
                     </div>
                     <div className="flex justify-between items-start text-sm">
                       <p>Destination</p>
                       <div>
                         <h2 className="font-semibold">{shipment.TO}</h2>
-                        <p>{shipment["ACTUAL DELIVERY DATE"] || "N/A"}</p>
+                        <p>
+                          {shipment["ACTUAL DELIVERY DATE"]
+                            ? new Date(
+                                shipment["ACTUAL DELIVERY DATE"]
+                              ).toLocaleDateString("en-US", {
+                                year: "numeric",
+                                month: "long",
+                                day: "numeric",
+                              })
+                            : "N/A"}
+                        </p>
                       </div>
                     </div>
                   </div>

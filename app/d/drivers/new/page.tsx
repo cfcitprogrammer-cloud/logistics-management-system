@@ -48,6 +48,7 @@ export default function NewDriverPage() {
       alert("Something went wrong. Driver submission failed");
     } finally {
       setLoading(false);
+      form.reset();
     }
   }
 

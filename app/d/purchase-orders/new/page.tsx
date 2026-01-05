@@ -59,6 +59,7 @@ export default function NewPurchaseOrderPage() {
       alert("Something went wrong. PO not submitted.");
     } finally {
       setLoading(false);
+      form.reset();
     }
   }
 

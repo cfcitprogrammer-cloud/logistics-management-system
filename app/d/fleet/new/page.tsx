@@ -49,6 +49,7 @@ export default function NewFleetPage() {
       alert("Something went wrong. Fleet not created");
     } finally {
       setLoading(false);
+      form.reset();
     }
   }
 
