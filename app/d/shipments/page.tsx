@@ -30,6 +30,7 @@ import {
 import { useEffect, useState } from "react";
 import axios from "axios";
 import Link from "next/link";
+import { Spinner } from "@/components/ui/spinner";
 
 type Shipment = {
   ID: string;
@@ -130,65 +131,69 @@ export default function ShipmentsPage() {
           </Link>
         </div>
 
-        <TabsContent
-          value="all"
-          className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4"
-        >
-          {shipments.map((shipment) => (
-            <Card key={shipment.ID}>
-              <CardHeader>
-                <CardTitle>#{shipment.ID}</CardTitle>
-                <CardDescription>
-                  <Badge>{shipment.STATUS}</Badge>
-                </CardDescription>
-                <CardAction>
-                  <Button variant={"ghost"}>
-                    <Ellipsis />
-                  </Button>
-                </CardAction>
-              </CardHeader>
+        {loading ? (
+          <Spinner className="mx-auto" />
+        ) : (
+          <TabsContent
+            value="all"
+            className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4"
+          >
+            {shipments.map((shipment) => (
+              <Card key={shipment.ID}>
+                <CardHeader>
+                  <CardTitle>#{shipment.ID}</CardTitle>
+                  <CardDescription>
+                    <Badge>{shipment.STATUS}</Badge>
+                  </CardDescription>
+                  <CardAction>
+                    <Button variant={"ghost"}>
+                      <Ellipsis />
+                    </Button>
+                  </CardAction>
+                </CardHeader>
 
-              <CardContent className="space-y-2">
-                <Separator className="mb-2" />
+                <CardContent className="space-y-2">
+                  <Separator className="mb-2" />
 
-                <div>
-                  <h1 className="text-sm font-semibold">
-                    PO: {shipment["PO ID"]}
-                  </h1>
-                  <p className="text-sm">Fleet: {shipment["FLEET ID"]}</p>
-                </div>
+                  <div>
+                    <h1 className="text-sm font-semibold">
+                      PO: {shipment["PO ID"]}
+                    </h1>
+                    <p className="text-sm">Fleet: {shipment["FLEET ID"]}</p>
+                  </div>
 
-                <div className="bg-gray-100 p-2 space-y-2 rounded">
-                  <div className="flex justify-between items-start text-sm">
-                    <p>Origin</p>
-                    <div>
-                      <h2 className="font-semibold">{shipment.FROM}</h2>
-                      <p>{shipment["EXPECTED DELIVERY DATE"]}</p>
+                  <div className="bg-gray-100 p-2 space-y-2 rounded">
+                    <div className="flex justify-between items-start text-sm">
+                      <p>Origin</p>
+                      <div>
+                        <h2 className="font-semibold">{shipment.FROM}</h2>
+                        <p>{shipment["EXPECTED DELIVERY DATE"]}</p>
+                      </div>
+                    </div>
+                    <div className="flex justify-between items-start text-sm">
+                      <p>Destination</p>
+                      <div>
+                        <h2 className="font-semibold">{shipment.TO}</h2>
+                        <p>{shipment["ACTUAL DELIVERY DATE"] || "N/A"}</p>
+                      </div>
                     </div>
                   </div>
-                  <div className="flex justify-between items-start text-sm">
-                    <p>Destination</p>
-                    <div>
-                      <h2 className="font-semibold">{shipment.TO}</h2>
-                      <p>{shipment["ACTUAL DELIVERY DATE"] || "N/A"}</p>
-                    </div>
-                  </div>
-                </div>
 
-                <div className="flex justify-between">
-                  <p>
-                    <strong>Current Location:</strong>{" "}
-                    {shipment["CURRENT LOCATION"]}
-                  </p>
-                  <p>
-                    <strong>Remarks:</strong> {shipment.REMARKS || "-"}
-                  </p>
-                </div>
-                <Progress value={Math.floor(Math.random() * 100)} />
-              </CardContent>
-            </Card>
-          ))}
-        </TabsContent>
+                  <div className="flex justify-between">
+                    <p>
+                      <strong>Current Location:</strong>{" "}
+                      {shipment["CURRENT LOCATION"]}
+                    </p>
+                    <p>
+                      <strong>Remarks:</strong> {shipment.REMARKS || "-"}
+                    </p>
+                  </div>
+                  <Progress value={Math.floor(Math.random() * 100)} />
+                </CardContent>
+              </Card>
+            ))}
+          </TabsContent>
+        )}
       </Tabs>
     </section>
   );
