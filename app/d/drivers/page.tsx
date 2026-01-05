@@ -90,8 +90,15 @@ export default function DriversPage() {
         </TabsContent>
 
         <TabsContent value="on-route">
-          {/* You can filter drivers by status */}
-          On Route drivers TAB
+          {loading ? (
+            <Spinner className="mx-auto" />
+          ) : (
+            <AllTabCard
+              data={data.filter((d) => d.STATUS == "On Route")}
+              onSearch={handleSearch}
+              onAdd={handleAddDriver}
+            />
+          )}
         </TabsContent>
       </Tabs>
 

@@ -29,7 +29,7 @@ export default function NewPurchaseOrderPage() {
       deliveryAddress: "",
       itemData: [],
       remarks: "",
-      file: null, // will store { name, type, content } object
+      file: null,
     },
   });
 
@@ -39,7 +39,6 @@ export default function NewPurchaseOrderPage() {
     try {
       console.log("Form data ready for submission:", data);
 
-      // Example: sending to Google Apps Script endpoint
       const res = await fetch(process.env.NEXT_PUBLIC_GAS_LINK || "", {
         method: "POST",
         headers: { "Content-Type": "text/plain" },
