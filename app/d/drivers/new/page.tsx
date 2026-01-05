@@ -9,6 +9,7 @@ import { Field, FieldError, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { driverSchema } from "@/db/schema/driver";
+import axios from "axios";
 
 export default function NewDriverPage() {
   const form = useForm<z.infer<typeof driverSchema>>({
@@ -25,14 +26,16 @@ export default function NewDriverPage() {
       console.log("Driver data ready for submission:", data);
 
       // Example: sending to your API
-      const res = await fetch("/api/drivers", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
-      });
+      const res = await axios.post(
+        process.env.NEXT_PUBLIC_GAS_LINK || "",
+        JSON.stringify({
+          action: "driver",
+          path: "create-driver",
+          ...data,
+        })
+      );
 
-      const result = await res.json();
-      console.log("Driver created:", result);
+      console.log("Driver created:", res);
     } catch (err) {
       console.error("Driver submission failed:", err);
     }

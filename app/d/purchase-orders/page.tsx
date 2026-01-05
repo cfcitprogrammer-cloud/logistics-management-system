@@ -30,6 +30,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { Spinner } from "@/components/ui/spinner";
 
 type POWithItems = PO & {
   items: POItem[];
@@ -40,6 +41,7 @@ export default function PurchaseOrdersPage() {
   const [selectedPO, setSelectedPO] = useState<PO | null>(null);
   const [sidePO, setSidePO] = useState<POWithItems | null>(null);
   const [sidePOLoading, setSidePOLoading] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   async function setStatus(dept: string, status: string, id: number) {
     try {
@@ -100,6 +102,8 @@ export default function PurchaseOrdersPage() {
   }
 
   async function getAllPO(page = 1, limit = 10) {
+    setLoading(true);
+
     try {
       const url = process.env.NEXT_PUBLIC_GAS_LINK || "";
 
@@ -116,6 +120,8 @@ export default function PurchaseOrdersPage() {
     } catch (error) {
       console.error("Error fetching PO data:", error);
       setData([]);
+    } finally {
+      setLoading(false);
     }
   }
 
@@ -143,82 +149,87 @@ export default function PurchaseOrdersPage() {
             </div>
           </header>
 
-          <POTable
-            data={data}
-            columns={columns}
-            onSelect={(row) => onSelect(row!)}
-            renderActions={(row) => (
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    onClick={(e) => e.stopPropagation()}
-                  >
-                    <Ellipsis className="h-4 w-4" />
-                  </Button>
-                </DropdownMenuTrigger>
+          {loading ? (
+            <Spinner className="mx-auto" />
+          ) : (
+            <POTable
+              data={data}
+              columns={columns}
+              onSelect={(row) => onSelect(row!)}
+              renderActions={(row) => (
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <Ellipsis className="h-4 w-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
 
-                <DropdownMenuContent align="end" className="w-48">
-                  {/* Accounting */}
-                  <DropdownMenuSub>
-                    <DropdownMenuSubTrigger>Accounting</DropdownMenuSubTrigger>
-                    <DropdownMenuSubContent>
-                      <DropdownMenuItem
-                        onClick={() => {
-                          setStatus("accounting", "APPROVED", row.ID);
-                        }}
-                        disabled={!!row["ACCOUNTING APPROVAL"]}
-                      >
-                        Approve
-                      </DropdownMenuItem>
-                      <DropdownMenuItem
-                        onClick={() => {
-                          setStatus("accounting", "PENDING", row.ID);
-                        }}
-                      >
-                        Pending
-                      </DropdownMenuItem>
-                      <DropdownMenuItem
-                        onClick={() => {
-                          setStatus("accounting", "REJECTED", row.ID);
-                        }}
-                      >
-                        Reject
-                      </DropdownMenuItem>
-                    </DropdownMenuSubContent>
-                  </DropdownMenuSub>
+                  <DropdownMenuContent align="end" className="w-48">
+                    {/* Accounting */}
+                    <DropdownMenuSub>
+                      <DropdownMenuSubTrigger>
+                        Accounting
+                      </DropdownMenuSubTrigger>
+                      <DropdownMenuSubContent>
+                        <DropdownMenuItem
+                          onClick={() => {
+                            setStatus("accounting", "APPROVED", row.ID);
+                          }}
+                          disabled={!!row["ACCOUNTING APPROVAL"]}
+                        >
+                          Approve
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          onClick={() => {
+                            setStatus("accounting", "PENDING", row.ID);
+                          }}
+                        >
+                          Pending
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          onClick={() => {
+                            setStatus("accounting", "REJECTED", row.ID);
+                          }}
+                        >
+                          Reject
+                        </DropdownMenuItem>
+                      </DropdownMenuSubContent>
+                    </DropdownMenuSub>
 
-                  {/* Warehouse */}
-                  <DropdownMenuSub>
-                    <DropdownMenuSubTrigger>Warehouse</DropdownMenuSubTrigger>
-                    <DropdownMenuSubContent>
-                      <DropdownMenuItem
-                        onClick={() => {
-                          setStatus("warehouse", "APPROVED", row.ID);
-                        }}
-                        disabled={!!row["WAREHOUSE APPROVAL"]}
-                      >
-                        Approve
-                      </DropdownMenuItem>
-                      <DropdownMenuItem
-                        onClick={() => {
-                          setStatus("warehouse", "PENDING", row.ID);
-                        }}
-                      >
-                        Pending
-                      </DropdownMenuItem>
-                      <DropdownMenuItem
-                        onClick={() => {
-                          setStatus("warehouse", "REJECTED", row.ID);
-                        }}
-                      >
-                        Reject
-                      </DropdownMenuItem>
-                    </DropdownMenuSubContent>
-                  </DropdownMenuSub>
+                    {/* Warehouse */}
+                    <DropdownMenuSub>
+                      <DropdownMenuSubTrigger>Warehouse</DropdownMenuSubTrigger>
+                      <DropdownMenuSubContent>
+                        <DropdownMenuItem
+                          onClick={() => {
+                            setStatus("warehouse", "APPROVED", row.ID);
+                          }}
+                          disabled={!!row["WAREHOUSE APPROVAL"]}
+                        >
+                          Approve
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          onClick={() => {
+                            setStatus("warehouse", "PENDING", row.ID);
+                          }}
+                        >
+                          Pending
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          onClick={() => {
+                            setStatus("warehouse", "REJECTED", row.ID);
+                          }}
+                        >
+                          Reject
+                        </DropdownMenuItem>
+                      </DropdownMenuSubContent>
+                    </DropdownMenuSub>
 
-                  {/* <DropdownMenuItem
+                    {/* <DropdownMenuItem
                     className="text-red-600 focus:text-red-600"
                     onClick={() => {
                       console.log("Delete PO", row);
@@ -235,10 +246,11 @@ export default function PurchaseOrdersPage() {
                   >
                     Proceed to shipment
                   </DropdownMenuItem> */}
-                </DropdownMenuContent>
-              </DropdownMenu>
-            )}
-          />
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              )}
+            />
+          )}
         </div>
 
         {/* PO DETAILS */}

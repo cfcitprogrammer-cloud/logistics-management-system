@@ -12,6 +12,7 @@ import { Input } from "@/components/ui/input";
 import DriverCard from "./driver-card";
 import { Driver } from "@/db/types/driver";
 import { useState } from "react";
+import Link from "next/link";
 
 interface AllTabCardProps {
   data: Driver[];
@@ -38,7 +39,10 @@ export default function AllTabCard({ data, onSearch, onAdd }: AllTabCardProps) {
 
         <CardAction className="space-x-2">
           <Button onClick={handleSearch}>Search</Button>
-          <Button onClick={onAdd}>Add Driver</Button>
+
+          <Link href={"/d/drivers/new"}>
+            <Button>Add Driver</Button>
+          </Link>
         </CardAction>
       </CardHeader>
 

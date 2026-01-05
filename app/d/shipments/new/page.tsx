@@ -35,7 +35,7 @@ type ShipmentFormData = {
 };
 
 type Driver = { ID: string; NAME: string };
-type Fleet = { ID: string; PLATE_NUMBER: string };
+type Fleet = { ID: string; "PLATE NUMBER": string; MODEL: string };
 
 export default function ShipmentForm() {
   const [form, setForm] = useState<ShipmentFormData>({
@@ -83,7 +83,7 @@ export default function ShipmentForm() {
         const res = await axios.get(url, {
           params: {
             action: "fleet",
-            path: "get-all-fleets",
+            path: "get-all-fleet",
             page: 1,
             limit: 100,
           },
@@ -114,11 +114,14 @@ export default function ShipmentForm() {
     try {
       const url = process.env.NEXT_PUBLIC_GAS_LINK || "";
 
-      const res = await axios.post(url, {
-        action: "shipment",
-        path: "create-shipment",
-        ...form,
-      });
+      const res = await axios.post(
+        url,
+        JSON.stringify({
+          action: "shipment",
+          path: "create-shipment",
+          ...form,
+        })
+      );
 
       if (res.data?.success) {
         setSuccess(true);
@@ -156,7 +159,7 @@ export default function ShipmentForm() {
             <div>
               <Label>PO ID</Label>
               <Input
-                type="number"
+                type="text"
                 name="poId"
                 value={form.poId}
                 onChange={handleChange}
@@ -167,18 +170,18 @@ export default function ShipmentForm() {
             <div>
               <Label>Fleet</Label>
               <Select
-                value={form.fleetId}
+                value={form.fleetId.toString()}
                 onValueChange={(val) =>
-                  setForm((prev) => ({ ...prev, fleetId: val }))
+                  setForm((prev) => ({ ...prev, fleetId: val.toString() }))
                 }
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="Select a fleet" />
+                  <SelectValue placeholder="Select Fleet" />
                 </SelectTrigger>
                 <SelectContent>
                   {fleets.map((fleet) => (
-                    <SelectItem key={fleet.ID} value={fleet.ID}>
-                      {fleet.PLATE_NUMBER} ({fleet.ID})
+                    <SelectItem key={fleet.ID} value={String(fleet.ID)}>
+                      {fleet.MODEL} ({fleet.ID})
                     </SelectItem>
                   ))}
                 </SelectContent>

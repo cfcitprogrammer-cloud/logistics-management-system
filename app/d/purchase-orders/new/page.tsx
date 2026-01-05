@@ -14,6 +14,7 @@ import ItemDataList from "@/components/custom/po/item-data-list";
 import { useEffect, useState } from "react";
 import { filetobase64 } from "@/lib/file-converter";
 import { Spinner } from "@/components/ui/spinner";
+import { redirect } from "next/navigation";
 
 export default function NewPurchaseOrderPage() {
   const [loading, setLoading] = useState(false);
@@ -50,7 +51,9 @@ export default function NewPurchaseOrderPage() {
       });
 
       const result = await res.json();
-      console.log("Upload result:", result);
+
+      alert("Purchase Order Submitted");
+      form.reset();
     } catch (err) {
       console.error("Form submission failed:", err);
       alert("Something went wrong. PO not submitted.");

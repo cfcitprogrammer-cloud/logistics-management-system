@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { fleetSchema } from "@/db/schema/fleet";
+import axios from "axios";
 
 export default function NewFleetPage() {
   const form = useForm<z.infer<typeof fleetSchema>>({
@@ -26,14 +27,16 @@ export default function NewFleetPage() {
     try {
       console.log("Fleet data ready for submission:", data);
 
-      const res = await fetch("/api/fleet", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
-      });
+      const res = await axios.post(
+        process.env.NEXT_PUBLIC_GAS_LINK || "",
+        JSON.stringify({
+          action: "fleet",
+          path: "create-fleet",
+          ...data,
+        })
+      );
 
-      const result = await res.json();
-      console.log("Fleet created:", result);
+      console.log("Fleet created:", res);
     } catch (err) {
       console.error("Fleet submission failed:", err);
     }

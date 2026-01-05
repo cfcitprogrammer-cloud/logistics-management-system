@@ -29,6 +29,7 @@ import {
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import axios from "axios";
+import Link from "next/link";
 
 type Shipment = {
   ID: string;
@@ -45,9 +46,12 @@ type Shipment = {
 };
 
 export default function ShipmentsPage() {
+  const [loading, setLoading] = useState(false);
   const [shipments, setShipments] = useState<Shipment[]>([]);
 
   async function getAllShipments() {
+    setLoading(true);
+
     try {
       const url = process.env.NEXT_PUBLIC_GAS_LINK || "";
 
@@ -64,6 +68,8 @@ export default function ShipmentsPage() {
     } catch (err) {
       console.error("Error fetching shipments:", err);
       setShipments([]);
+    } finally {
+      setLoading(false);
     }
   }
 
@@ -104,13 +110,13 @@ export default function ShipmentsPage() {
 
       <Tabs defaultValue="all">
         <div className="flex justify-between items-center gap-2">
-          <TabsList>
+          {/* <TabsList>
             <TabsTrigger value="all">All</TabsTrigger>
             <TabsTrigger value="delivered">Delivered</TabsTrigger>
             <TabsTrigger value="in-transit">In Transit</TabsTrigger>
             <TabsTrigger value="pending">Pending</TabsTrigger>
             <TabsTrigger value="out-for-delivery">Out for Delivery</TabsTrigger>
-          </TabsList>
+          </TabsList> */}
 
           <InputGroup className="w-50 ml-auto">
             <InputGroupInput placeholder="Search Shipment ID" />
@@ -119,7 +125,9 @@ export default function ShipmentsPage() {
             </InputGroupAddon>
           </InputGroup>
 
-          <Button>New Shipment</Button>
+          <Link href={"/d/shipments/new"}>
+            <Button>New Shipment</Button>
+          </Link>
         </div>
 
         <TabsContent

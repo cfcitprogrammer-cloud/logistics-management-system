@@ -5,6 +5,7 @@ import VehicleAlerts from "@/components/custom/fleets/vehicle-alerts";
 import Stat from "@/components/custom/stat";
 import { Button } from "@/components/ui/button";
 import { Pencil, Truck } from "lucide-react";
+import Link from "next/link";
 
 export default function FleetPage() {
   return (
@@ -15,7 +16,9 @@ export default function FleetPage() {
       <Stat title="Total Drivers" icon={Truck} value="16" />
 
       <header>
-        <Button>New Fleet</Button>
+        <Link href={"/d/fleet/new"}>
+          <Button>New Fleet</Button>
+        </Link>
       </header>
 
       <div className="col-span-full">
