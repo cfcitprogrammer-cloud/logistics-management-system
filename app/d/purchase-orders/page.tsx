@@ -179,7 +179,6 @@ export default function PurchaseOrdersPage() {
                           onClick={() => {
                             setStatus("accounting", "APPROVED", row.ID);
                           }}
-                          disabled={!!row["ACCOUNTING APPROVAL"]}
                         >
                           Approve
                         </DropdownMenuItem>
@@ -208,7 +207,6 @@ export default function PurchaseOrdersPage() {
                           onClick={() => {
                             setStatus("warehouse", "APPROVED", row.ID);
                           }}
-                          disabled={!!row["WAREHOUSE APPROVAL"]}
                         >
                           Approve
                         </DropdownMenuItem>
@@ -354,7 +352,7 @@ export default function PurchaseOrdersPage() {
                   </Table>
                 </div>
 
-                <Button className="col-span-full">View Details</Button>
+                {/* <Button className="col-span-full">View Details</Button> */}
               </div>
             ) : (
               <p className="text-sm text-gray-500">

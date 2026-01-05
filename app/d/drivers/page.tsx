@@ -6,12 +6,16 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Driver } from "@/db/types/driver";
 import { useEffect, useState } from "react";
 import axios from "axios";
+import { Spinner } from "@/components/ui/spinner";
 
 export default function DriversPage() {
   const [data, setData] = useState<Driver[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
+  const [loading, setLoading] = useState(false);
 
   async function getAllDrivers(page = 1, limit = 10, query = "") {
+    setLoading(true);
+
     try {
       const url = process.env.NEXT_PUBLIC_GAS_LINK || "";
 
@@ -30,6 +34,8 @@ export default function DriversPage() {
     } catch (error) {
       console.error("Error fetching Drivers data:", error);
       setData([]);
+    } finally {
+      setLoading(false);
     }
   }
 
@@ -60,16 +66,27 @@ export default function DriversPage() {
         </TabsList>
 
         <TabsContent value="all">
-          <AllTabCard
-            data={data}
-            onSearch={handleSearch}
-            onAdd={handleAddDriver}
-          />
+          {loading ? (
+            <Spinner className="mx-auto" />
+          ) : (
+            <AllTabCard
+              data={data}
+              onSearch={handleSearch}
+              onAdd={handleAddDriver}
+            />
+          )}
         </TabsContent>
 
         <TabsContent value="available">
-          {/* You can filter drivers by status */}
-          Available drivers TAB
+          {loading ? (
+            <Spinner className="mx-auto" />
+          ) : (
+            <AllTabCard
+              data={data.filter((d) => d.STATUS == "Available")}
+              onSearch={handleSearch}
+              onAdd={handleAddDriver}
+            />
+          )}
         </TabsContent>
 
         <TabsContent value="on-route">

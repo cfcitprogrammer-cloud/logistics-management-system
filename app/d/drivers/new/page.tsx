@@ -10,8 +10,11 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { driverSchema } from "@/db/schema/driver";
 import axios from "axios";
+import { useState } from "react";
+import { Spinner } from "@/components/ui/spinner";
 
 export default function NewDriverPage() {
+  const [loading, setLoading] = useState(false);
   const form = useForm<z.infer<typeof driverSchema>>({
     resolver: zodResolver(driverSchema),
     defaultValues: {
@@ -22,6 +25,8 @@ export default function NewDriverPage() {
   });
 
   async function onSubmit(data: z.infer<typeof driverSchema>) {
+    setLoading(true);
+
     try {
       console.log("Driver data ready for submission:", data);
 
@@ -36,8 +41,13 @@ export default function NewDriverPage() {
       );
 
       console.log("Driver created:", res);
+      alert("Driver Created");
+      form.reset();
     } catch (err) {
       console.error("Driver submission failed:", err);
+      alert("Something went wrong. Driver submission failed");
+    } finally {
+      setLoading(false);
     }
   }
 
@@ -117,8 +127,8 @@ export default function NewDriverPage() {
             </CardContent>
 
             <CardFooter>
-              <Button type="submit" className="w-full">
-                Add Driver
+              <Button type="submit" className="w-full" disabled={loading}>
+                {loading ? <Spinner /> : "Add Driver"}
               </Button>
             </CardFooter>
           </Card>

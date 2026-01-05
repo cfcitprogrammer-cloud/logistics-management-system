@@ -11,19 +11,25 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { fleetSchema } from "@/db/schema/fleet";
 import axios from "axios";
+import { useState } from "react";
+import { Spinner } from "@/components/ui/spinner";
 
 export default function NewFleetPage() {
+  const [loading, setLoading] = useState(false);
+
   const form = useForm<z.infer<typeof fleetSchema>>({
     resolver: zodResolver(fleetSchema),
     defaultValues: {
       plateNumber: "",
       model: "",
-      loadCapacity: "0",
+      loadCapacity: "",
       remarks: "",
     },
   });
 
   async function onSubmit(data: z.infer<typeof fleetSchema>) {
+    setLoading(true);
+
     try {
       console.log("Fleet data ready for submission:", data);
 
@@ -37,8 +43,12 @@ export default function NewFleetPage() {
       );
 
       console.log("Fleet created:", res);
+      alert("Fleet created.");
     } catch (err) {
       console.error("Fleet submission failed:", err);
+      alert("Something went wrong. Fleet not created");
+    } finally {
+      setLoading(false);
     }
   }
 
@@ -105,9 +115,9 @@ export default function NewFleetPage() {
                         {...field}
                         {...field}
                         id={field.name}
-                        type="number"
+                        type="text"
                         aria-invalid={fieldState.invalid}
-                        placeholder="1000"
+                        placeholder="1000 kg"
                         className="bg-slate-100"
                       />
                       {fieldState.invalid && (
@@ -144,7 +154,7 @@ export default function NewFleetPage() {
 
             <CardFooter>
               <Button type="submit" className="w-full">
-                Add Fleet
+                {loading ? <Spinner /> : "Add Fleet"}
               </Button>
             </CardFooter>
           </Card>
