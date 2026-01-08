@@ -156,16 +156,16 @@ export default function ShipmentsPage() {
                   <Separator className="mb-2" />
 
                   <div>
-                    <h1 className="text-sm font-semibold">
-                      PO: {shipment["PO ID"]}
-                    </h1>
-                    <p className="text-sm">Fleet: {shipment["FLEET ID"]}</p>
+                    <p>
+                      <strong>Assigned Driver: </strong>
+                      John Doe
+                    </p>
                   </div>
 
                   <div className="bg-gray-100 p-2 space-y-2 rounded">
                     <div className="flex justify-between items-start text-sm">
                       <p>Origin</p>
-                      <div>
+                      <div className="text-right">
                         <h2 className="font-semibold">{shipment.FROM}</h2>
                         <p>
                           {shipment["EXPECTED DELIVERY DATE"]
@@ -182,7 +182,7 @@ export default function ShipmentsPage() {
                     </div>
                     <div className="flex justify-between items-start text-sm">
                       <p>Destination</p>
-                      <div>
+                      <div className="text-right">
                         <h2 className="font-semibold">{shipment.TO}</h2>
                         <p>
                           {shipment["ACTUAL DELIVERY DATE"]
@@ -199,16 +199,16 @@ export default function ShipmentsPage() {
                     </div>
                   </div>
 
-                  <div className="flex justify-between">
-                    <p>
-                      <strong>Current Location:</strong>{" "}
-                      {shipment["CURRENT LOCATION"]}
-                    </p>
-                    <p>
-                      <strong>Remarks:</strong> {shipment.REMARKS || "-"}
-                    </p>
+                  <div className="text-sm space-y-2">
+                    <div>
+                      <strong>Current Location:</strong>
+                      <p>{shipment["CURRENT LOCATION"]}</p>
+                    </div>
+                    <div>
+                      <strong>Remarks:</strong>
+                      <p>{shipment.REMARKS || "-"}</p>
+                    </div>
                   </div>
-                  <Progress value={Math.floor(Math.random() * 100)} />
                 </CardContent>
               </Card>
             ))}

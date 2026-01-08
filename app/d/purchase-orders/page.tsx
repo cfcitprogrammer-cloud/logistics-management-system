@@ -142,7 +142,7 @@ export default function PurchaseOrdersPage() {
             <h1 className="text-sm font-semibold">Purchase Orders</h1>
 
             <div className="flex gap-4">
-              <Input placeholder="Search..." />
+              {/* <Input placeholder="Search..." /> */}
               <Link href="purchase-orders/new">
                 <Button>New PO</Button>
               </Link>

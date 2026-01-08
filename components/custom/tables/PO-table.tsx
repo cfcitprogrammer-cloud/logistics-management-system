@@ -12,10 +12,13 @@ import {
   Table,
   TableBody,
   TableCell,
+  TableFooter,
   TableHead,
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { ButtonGroup } from "@/components/ui/button-group";
+import { Button } from "@/components/ui/button";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -123,6 +126,19 @@ export function POTable<TData, TValue>({
           )}
         </TableBody>
       </Table>
+
+      <div className="p-2 flex justify-between items-center">
+        <div>
+          <p>Showing 1 of 20</p>
+        </div>
+
+        <div>
+          <ButtonGroup>
+            <Button>Prev</Button>
+            <Button>Next</Button>
+          </ButtonGroup>
+        </div>
+      </div>
     </div>
   );
 }

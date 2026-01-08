@@ -37,11 +37,11 @@ const data = {
     avatar: "/avatars/shadcn.jpg",
   },
   navMain: [
-    // {
-    //   title: "Dashboard",
-    //   url: "/d/dashboard",
-    //   icon: LayoutDashboard,
-    // },
+    {
+      title: "Dashboard",
+      url: "/d/dashboard",
+      icon: LayoutDashboard,
+    },
   ],
 
   navOrders: [
@@ -68,11 +68,11 @@ const data = {
       url: "/d/shipments",
       icon: Truck,
     },
-    // {
-    //   title: "Tracking",
-    //   url: "/d/tracking",
-    //   icon: Route,
-    // },
+    {
+      title: "Tracking",
+      url: "/d/tracking",
+      icon: Route,
+    },
   ],
 
   navAssets: [
@@ -147,7 +147,9 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         {/* Secondary / Utility */}
         {/* <NavSecondary items={data.navSecondary} title="System" /> */}
       </SidebarContent>
-      <SidebarFooter>{/* <NavUser user={data.user} /> */}</SidebarFooter>
+      <SidebarFooter>
+        <NavUser />
+      </SidebarFooter>
     </Sidebar>
   );
 }

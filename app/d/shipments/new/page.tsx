@@ -76,7 +76,7 @@ export default function ShipmentForm() {
     setForm((prev) => {
       const exists = prev.pos.some((p) => po["ID"] === po["ID"]);
 
-      if (exists) return prev; // no change
+      // if (exists) return prev; // no change
 
       return {
         ...prev,
@@ -92,7 +92,7 @@ export default function ShipmentForm() {
     }));
   }
 
-  async function getAllPO(page = 1, limit = 1) {
+  async function getAllPO(page = 1, limit = 10) {
     try {
       const url = process.env.NEXT_PUBLIC_GAS_LINK || "";
 
@@ -104,6 +104,8 @@ export default function ShipmentForm() {
           limit,
         },
       });
+
+      console.log(response.data);
 
       setPO(response.data?.data || []);
     } catch (error) {
@@ -177,6 +179,12 @@ export default function ShipmentForm() {
         })
       );
 
+      console.log({
+        action: "shipment",
+        path: "create-shipment",
+        ...form,
+      });
+
       if (res.data?.success) {
         setSuccess(true);
         setForm({
@@ -193,9 +201,11 @@ export default function ShipmentForm() {
           pos: [],
         });
       } else {
+        console.log(res);
         setError(res.data?.message || "Unknown error");
       }
     } catch (err: any) {
+      console.log(err);
       setError(err.message || "Request failed");
     } finally {
       setLoading(false);
