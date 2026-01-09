@@ -168,6 +168,8 @@ export default function DeliveriesPage() {
           />
         </CardContent>
       </Card>
+
+      <NewDeliveriesDialog />
     </section>
   );
 }
