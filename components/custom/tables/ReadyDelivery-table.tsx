@@ -22,27 +22,27 @@ import { PO } from "@/db/types/po";
 import axios from "axios";
 import { POEmpty } from "../po/empty-po";
 
-interface POTableProps {
+interface ReadyDeliveryTableProps {
   columns: ColumnDef<PO, any>[];
   renderActions?: (row: PO) => React.ReactNode;
   onSelect?: (row: PO | null) => void;
   pageSize?: number;
 }
 
-export default function POTable({
+export default function ReadyDeliveryTable({
   columns,
   renderActions,
   onSelect,
   pageSize = 10,
-}: POTableProps) {
+}: ReadyDeliveryTableProps) {
   const [data, setData] = useState<PO[]>([]);
   const [rowSelection, setRowSelection] = useState<Record<string, boolean>>({});
   const [currentPage, setCurrentPage] = useState(1);
   const [maxPage, setMaxPage] = useState(1);
   const [loading, setLoading] = useState(false);
 
-  const [searchInput, setSearchInput] = useState(""); // what user types
-  const [searchTerm, setSearchTerm] = useState(""); // what we actually search
+  const [searchInput, setSearchInput] = useState("");
+  const [searchTerm, setSearchTerm] = useState("");
 
   const actionColumn: ColumnDef<PO> | null = renderActions
     ? {
@@ -76,14 +76,15 @@ export default function POTable({
     getRowId: (row) => row.ID?.toString() ?? "",
   });
 
-  async function fetchPOs(page = 1, limit = 10, search = "") {
+  // Fetch only POs approved by accounting and warehouse
+  async function fetchReadyPOs(page = 1, limit = 10, search = "") {
     setLoading(true);
     try {
       const url = process.env.NEXT_PUBLIC_GAS_LINK || "";
       const response = await axios.get(url, {
         params: {
           action: "purchase-order",
-          path: "get-all-po",
+          path: "get-ready-po",
           page,
           limit,
           search,
@@ -94,7 +95,7 @@ export default function POTable({
       const total = response.data?.totalPages || 1;
       setMaxPage(Math.ceil(total / limit));
     } catch (error) {
-      console.error("Error fetching PO data:", error);
+      console.error("Error fetching ready-for-delivery POs:", error);
       setData([]);
       setMaxPage(1);
     } finally {
@@ -102,12 +103,10 @@ export default function POTable({
     }
   }
 
-  // Fetch when page, pageSize, or searchTerm changes
   useEffect(() => {
-    fetchPOs(currentPage, pageSize, searchTerm);
+    fetchReadyPOs(currentPage, pageSize, searchTerm);
   }, [currentPage, pageSize, searchTerm]);
 
-  // Reset table when search input is cleared
   useEffect(() => {
     if (searchInput === "") {
       setCurrentPage(1);
@@ -115,9 +114,8 @@ export default function POTable({
     }
   }, [searchInput]);
 
-  // Trigger fetch on search button or Enter
   const handleSearch = () => {
-    setCurrentPage(1); // reset page
+    setCurrentPage(1);
     setSearchTerm(searchInput);
   };
 
@@ -127,7 +125,7 @@ export default function POTable({
 
   return (
     <div className="overflow-hidden rounded-md border">
-      {/* Search input */}
+      {/* Search */}
       <div className="p-2 flex gap-2">
         <Input
           placeholder="Search POs..."
@@ -202,27 +200,22 @@ export default function POTable({
       {/* Pagination */}
       <div className="p-2 flex justify-between items-center">
         <div>
-          <p>
-            Page {currentPage} of {maxPage}
-          </p>
+          Page {currentPage} of {maxPage}
         </div>
-
-        <div>
-          <ButtonGroup>
-            <Button
-              onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
-              disabled={currentPage === 1}
-            >
-              Prev
-            </Button>
-            <Button
-              onClick={() => setCurrentPage((p) => Math.min(p + 1, maxPage))}
-              disabled={currentPage === maxPage}
-            >
-              Next
-            </Button>
-          </ButtonGroup>
-        </div>
+        <ButtonGroup>
+          <Button
+            onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
+            disabled={currentPage === 1}
+          >
+            Prev
+          </Button>
+          <Button
+            onClick={() => setCurrentPage((p) => Math.min(p + 1, maxPage))}
+            disabled={currentPage === maxPage}
+          >
+            Next
+          </Button>
+        </ButtonGroup>
       </div>
     </div>
   );

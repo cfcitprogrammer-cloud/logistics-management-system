@@ -33,7 +33,6 @@ import { PO } from "@/db/types/po";
 import { Ellipsis, Plus, Trash } from "lucide-react";
 
 type ShipmentFormData = {
-  poId: number;
   fleetId: string;
   driverId: string;
   from: string;
@@ -42,7 +41,6 @@ type ShipmentFormData = {
   actualDelivery: string;
   currentLocation: string;
   remarks: string;
-  status: "Pending" | "In Transit" | "Delivered" | "Out for Delivery";
   pos: PO[];
 };
 
@@ -51,7 +49,6 @@ type Fleet = { ID: string; "PLATE NUMBER": string; MODEL: string };
 
 export default function ShipmentForm() {
   const [form, setForm] = useState<ShipmentFormData>({
-    poId: 0,
     fleetId: "",
     driverId: "",
     from: "",
@@ -60,7 +57,6 @@ export default function ShipmentForm() {
     actualDelivery: "",
     currentLocation: "",
     remarks: "",
-    status: "Pending",
     pos: [],
   });
 
@@ -188,7 +184,6 @@ export default function ShipmentForm() {
       if (res.data?.success) {
         setSuccess(true);
         setForm({
-          poId: 0,
           fleetId: "",
           driverId: "",
           from: "",
@@ -197,7 +192,6 @@ export default function ShipmentForm() {
           actualDelivery: "",
           currentLocation: "",
           remarks: "",
-          status: "Pending",
           pos: [],
         });
       } else {
@@ -222,17 +216,6 @@ export default function ShipmentForm() {
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div>
-                <Label>PO ID</Label>
-                <Input
-                  type="text"
-                  name="poId"
-                  value={form.poId}
-                  onChange={handleChange}
-                  required
-                />
-              </div>
-
               <div>
                 <Label>Fleet</Label>
                 <Select
@@ -336,31 +319,6 @@ export default function ShipmentForm() {
                 value={form.remarks}
                 onChange={handleChange}
               />
-            </div>
-
-            <div>
-              <Label>Status</Label>
-              <Select
-                value={form.status}
-                onValueChange={(val) =>
-                  setForm((prev) => ({
-                    ...prev,
-                    status: val as ShipmentFormData["status"],
-                  }))
-                }
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select status" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="Pending">Pending</SelectItem>
-                  <SelectItem value="In Transit">In Transit</SelectItem>
-                  <SelectItem value="Delivered">Delivered</SelectItem>
-                  <SelectItem value="Out for Delivery">
-                    Out for Delivery
-                  </SelectItem>
-                </SelectContent>
-              </Select>
             </div>
 
             <CardFooter className="flex flex-col sm:flex-row justify-between items-center gap-2">

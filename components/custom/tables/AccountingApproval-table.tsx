@@ -1,12 +1,14 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
+import axios from "axios";
 import {
   ColumnDef,
   flexRender,
   getCoreRowModel,
   useReactTable,
 } from "@tanstack/react-table";
+import { PO } from "@/db/types/po";
 import {
   Table,
   TableBody,
@@ -15,41 +17,35 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { ButtonGroup } from "@/components/ui/button-group";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { PO } from "@/db/types/po";
-import axios from "axios";
-import { POEmpty } from "../po/empty-po";
 
-interface POTableProps {
+interface AccountingApprovalTableProps {
   columns: ColumnDef<PO, any>[];
-  renderActions?: (row: PO) => React.ReactNode;
   onSelect?: (row: PO | null) => void;
+  renderActions?: (row: PO) => React.ReactNode;
   pageSize?: number;
 }
 
-export default function POTable({
+export default function AccountingApprovalTable({
   columns,
-  renderActions,
   onSelect,
+  renderActions,
   pageSize = 10,
-}: POTableProps) {
+}: AccountingApprovalTableProps) {
   const [data, setData] = useState<PO[]>([]);
   const [rowSelection, setRowSelection] = useState<Record<string, boolean>>({});
   const [currentPage, setCurrentPage] = useState(1);
   const [maxPage, setMaxPage] = useState(1);
+  const [searchInput, setSearchInput] = useState("");
+  const [searchTerm, setSearchTerm] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const [searchInput, setSearchInput] = useState(""); // what user types
-  const [searchTerm, setSearchTerm] = useState(""); // what we actually search
-
-  const actionColumn: ColumnDef<PO> | null = renderActions
+  const actionColumn = renderActions
     ? {
         id: "actions",
         header: "Actions",
-        cell: ({ row }) => (
-          <div className="flex gap-2" onClick={(e) => e.stopPropagation()}>
+        cell: ({ row }: any) => (
+          <div onClick={(e) => e.stopPropagation()}>
             {renderActions(row.original)}
           </div>
         ),
@@ -80,7 +76,7 @@ export default function POTable({
     setLoading(true);
     try {
       const url = process.env.NEXT_PUBLIC_GAS_LINK || "";
-      const response = await axios.get(url, {
+      const res = await axios.get(url, {
         params: {
           action: "purchase-order",
           path: "get-all-po",
@@ -89,12 +85,11 @@ export default function POTable({
           search,
         },
       });
-
-      setData(response.data?.data || []);
-      const total = response.data?.totalPages || 1;
+      setData(res.data?.data || []);
+      const total = res.data?.totalPages || 1;
       setMaxPage(Math.ceil(total / limit));
-    } catch (error) {
-      console.error("Error fetching PO data:", error);
+    } catch (err) {
+      console.error(err);
       setData([]);
       setMaxPage(1);
     } finally {
@@ -102,12 +97,10 @@ export default function POTable({
     }
   }
 
-  // Fetch when page, pageSize, or searchTerm changes
   useEffect(() => {
     fetchPOs(currentPage, pageSize, searchTerm);
   }, [currentPage, pageSize, searchTerm]);
 
-  // Reset table when search input is cleared
   useEffect(() => {
     if (searchInput === "") {
       setCurrentPage(1);
@@ -115,9 +108,8 @@ export default function POTable({
     }
   }, [searchInput]);
 
-  // Trigger fetch on search button or Enter
   const handleSearch = () => {
-    setCurrentPage(1); // reset page
+    setCurrentPage(1);
     setSearchTerm(searchInput);
   };
 
@@ -127,10 +119,11 @@ export default function POTable({
 
   return (
     <div className="overflow-hidden rounded-md border">
-      {/* Search input */}
+      {/* Search */}
       <div className="p-2 flex gap-2">
-        <Input
+        <input
           placeholder="Search POs..."
+          className="border rounded px-2 py-1 flex-1"
           value={searchInput}
           onChange={(e) => setSearchInput(e.target.value)}
           onKeyDown={handleKeyDown}
@@ -192,7 +185,7 @@ export default function POTable({
                 colSpan={columns.length + (actionColumn ? 1 : 0)}
                 className="h-24 text-center"
               >
-                <POEmpty />
+                No POs found
               </TableCell>
             </TableRow>
           )}
@@ -202,26 +195,21 @@ export default function POTable({
       {/* Pagination */}
       <div className="p-2 flex justify-between items-center">
         <div>
-          <p>
-            Page {currentPage} of {maxPage}
-          </p>
+          Page {currentPage} of {maxPage}
         </div>
-
-        <div>
-          <ButtonGroup>
-            <Button
-              onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
-              disabled={currentPage === 1}
-            >
-              Prev
-            </Button>
-            <Button
-              onClick={() => setCurrentPage((p) => Math.min(p + 1, maxPage))}
-              disabled={currentPage === maxPage}
-            >
-              Next
-            </Button>
-          </ButtonGroup>
+        <div className="flex gap-2">
+          <Button
+            onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
+            disabled={currentPage === 1}
+          >
+            Prev
+          </Button>
+          <Button
+            onClick={() => setCurrentPage((p) => Math.min(p + 1, maxPage))}
+            disabled={currentPage === maxPage}
+          >
+            Next
+          </Button>
         </div>
       </div>
     </div>

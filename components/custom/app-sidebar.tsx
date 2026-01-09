@@ -22,6 +22,7 @@ import {
   Presentation,
   ReceiptText,
   Route,
+  Stamp,
   Truck,
   Users,
   Warehouse,
@@ -63,41 +64,46 @@ const data = {
     //   url: "/d/calendar",
     //   icon: Calendar,
     // },
-    {
-      title: "Shipments",
-      url: "/d/shipments",
-      icon: Truck,
-    },
-    {
-      title: "Tracking",
-      url: "/d/tracking",
-      icon: Route,
-    },
+    // {
+    //   title: "Shipments",
+    //   url: "/d/shipments",
+    //   icon: Truck,
+    // },
+    // {
+    //   title: "Tracking",
+    //   url: "/d/tracking",
+    //   icon: Route,
+    // },
   ],
 
   navAssets: [
+    {
+      title: "Warehouse",
+      url: "/d/warehouse",
+      icon: Warehouse,
+    },
+    {
+      title: "Deliveries",
+      url: "/d/deliveries",
+      icon: Truck,
+    },
     // {
-    //   title: "Warehouse",
-    //   url: "/d/warehouse",
-    //   icon: Warehouse,
+    //   title: "Fleet",
+    //   url: "/d/fleet",
+    //   icon: CarFront,
     // },
-    {
-      title: "Fleet",
-      url: "/d/fleet",
-      icon: CarFront,
-    },
-    {
-      title: "Drivers",
-      url: "/d/drivers",
-      icon: IdCard,
-    },
+    // {
+    //   title: "Drivers",
+    //   url: "/d/drivers",
+    //   icon: IdCard,
+    // },
   ],
 
   navFinance: [
     {
-      title: "Invoices and Billing",
+      title: "Approvals",
       url: "/d/invoices",
-      icon: ReceiptText,
+      icon: Stamp,
     },
   ],
   navSecondary: [
@@ -136,13 +142,13 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <NavSecondary items={data.navOrders} title="Orders & Approvals" />
 
         {/* Operations */}
-        <NavSecondary items={data.navOperations} title="Operations" />
+        {/* <NavSecondary items={data.navOperations} title="Operations" /> */}
 
         {/* Assets & Resources */}
         <NavSecondary items={data.navAssets} title="Assets & Resources" />
 
         {/* Finance */}
-        {/* <NavSecondary items={data.navFinance} title="Finance" /> */}
+        <NavSecondary items={data.navFinance} title="Accounting" />
 
         {/* Secondary / Utility */}
         {/* <NavSecondary items={data.navSecondary} title="System" /> */}

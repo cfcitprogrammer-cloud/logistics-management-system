@@ -18,33 +18,32 @@ import {
 import { ButtonGroup } from "@/components/ui/button-group";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { PO } from "@/db/types/po";
+import { Delivery } from "@/db/types/delivery";
 import axios from "axios";
-import { POEmpty } from "../po/empty-po";
 
-interface POTableProps {
-  columns: ColumnDef<PO, any>[];
-  renderActions?: (row: PO) => React.ReactNode;
-  onSelect?: (row: PO | null) => void;
+interface DeliveryTableProps {
+  columns: ColumnDef<Delivery, any>[];
+  renderActions?: (row: Delivery) => React.ReactNode;
+  onSelect?: (row: Delivery | null) => void;
   pageSize?: number;
 }
 
-export default function POTable({
+export default function DeliveryTable({
   columns,
   renderActions,
   onSelect,
   pageSize = 10,
-}: POTableProps) {
-  const [data, setData] = useState<PO[]>([]);
+}: DeliveryTableProps) {
+  const [data, setData] = useState<Delivery[]>([]);
   const [rowSelection, setRowSelection] = useState<Record<string, boolean>>({});
   const [currentPage, setCurrentPage] = useState(1);
   const [maxPage, setMaxPage] = useState(1);
   const [loading, setLoading] = useState(false);
 
-  const [searchInput, setSearchInput] = useState(""); // what user types
-  const [searchTerm, setSearchTerm] = useState(""); // what we actually search
+  const [searchInput, setSearchInput] = useState(""); // typed
+  const [searchTerm, setSearchTerm] = useState(""); // applied
 
-  const actionColumn: ColumnDef<PO> | null = renderActions
+  const actionColumn: ColumnDef<Delivery> | null = renderActions
     ? {
         id: "actions",
         header: "Actions",
@@ -76,14 +75,14 @@ export default function POTable({
     getRowId: (row) => row.ID?.toString() ?? "",
   });
 
-  async function fetchPOs(page = 1, limit = 10, search = "") {
+  async function fetchDeliveries(page = 1, limit = 10, search = "") {
     setLoading(true);
     try {
       const url = process.env.NEXT_PUBLIC_GAS_LINK || "";
       const response = await axios.get(url, {
         params: {
-          action: "purchase-order",
-          path: "get-all-po",
+          action: "delivery",
+          path: "list",
           page,
           limit,
           search,
@@ -94,7 +93,7 @@ export default function POTable({
       const total = response.data?.totalPages || 1;
       setMaxPage(Math.ceil(total / limit));
     } catch (error) {
-      console.error("Error fetching PO data:", error);
+      console.error("Error fetching deliveries:", error);
       setData([]);
       setMaxPage(1);
     } finally {
@@ -102,12 +101,10 @@ export default function POTable({
     }
   }
 
-  // Fetch when page, pageSize, or searchTerm changes
   useEffect(() => {
-    fetchPOs(currentPage, pageSize, searchTerm);
+    fetchDeliveries(currentPage, pageSize, searchTerm);
   }, [currentPage, pageSize, searchTerm]);
 
-  // Reset table when search input is cleared
   useEffect(() => {
     if (searchInput === "") {
       setCurrentPage(1);
@@ -115,9 +112,8 @@ export default function POTable({
     }
   }, [searchInput]);
 
-  // Trigger fetch on search button or Enter
   const handleSearch = () => {
-    setCurrentPage(1); // reset page
+    setCurrentPage(1);
     setSearchTerm(searchInput);
   };
 
@@ -130,7 +126,7 @@ export default function POTable({
       {/* Search input */}
       <div className="p-2 flex gap-2">
         <Input
-          placeholder="Search POs..."
+          placeholder="Search PO ID or Tracking ID..."
           value={searchInput}
           onChange={(e) => setSearchInput(e.target.value)}
           onKeyDown={handleKeyDown}
@@ -192,7 +188,7 @@ export default function POTable({
                 colSpan={columns.length + (actionColumn ? 1 : 0)}
                 className="h-24 text-center"
               >
-                <POEmpty />
+                No deliveries found.
               </TableCell>
             </TableRow>
           )}
@@ -202,27 +198,22 @@ export default function POTable({
       {/* Pagination */}
       <div className="p-2 flex justify-between items-center">
         <div>
-          <p>
-            Page {currentPage} of {maxPage}
-          </p>
+          Page {currentPage} of {maxPage}
         </div>
-
-        <div>
-          <ButtonGroup>
-            <Button
-              onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
-              disabled={currentPage === 1}
-            >
-              Prev
-            </Button>
-            <Button
-              onClick={() => setCurrentPage((p) => Math.min(p + 1, maxPage))}
-              disabled={currentPage === maxPage}
-            >
-              Next
-            </Button>
-          </ButtonGroup>
-        </div>
+        <ButtonGroup>
+          <Button
+            onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
+            disabled={currentPage === 1}
+          >
+            Prev
+          </Button>
+          <Button
+            onClick={() => setCurrentPage((p) => Math.min(p + 1, maxPage))}
+            disabled={currentPage === maxPage}
+          >
+            Next
+          </Button>
+        </ButtonGroup>
       </div>
     </div>
   );
