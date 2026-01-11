@@ -43,6 +43,7 @@ export default function DeliveryTable({
   const [searchInput, setSearchInput] = useState(""); // typed
   const [searchTerm, setSearchTerm] = useState(""); // applied
 
+  // Action column for extra buttons per row
   const actionColumn: ColumnDef<Delivery> | null = renderActions
     ? {
         id: "actions",
@@ -75,13 +76,14 @@ export default function DeliveryTable({
     getRowId: (row) => row.ID?.toString() ?? "",
   });
 
-  async function fetchDeliveries(page = 1, limit = 10, search = "") {
+  // Fetch deliveries from Google Apps Script
+  const fetchDeliveries = async (page = 1, limit = pageSize, search = "") => {
     setLoading(true);
     try {
       const url = process.env.NEXT_PUBLIC_GAS_LINK || "";
       const response = await axios.get(url, {
         params: {
-          action: "delivery",
+          action: "deliveries",
           path: "list",
           page,
           limit,
@@ -89,9 +91,12 @@ export default function DeliveryTable({
         },
       });
 
-      setData(response.data?.data || []);
-      const total = response.data?.totalPages || 1;
-      setMaxPage(Math.ceil(total / limit));
+      const fetchedData = response.data?.data || [];
+      const totalPages = response.data?.totalPages || 1;
+
+      setData(fetchedData);
+      console.log(response.data);
+      setMaxPage(totalPages);
     } catch (error) {
       console.error("Error fetching deliveries:", error);
       setData([]);
@@ -99,12 +104,14 @@ export default function DeliveryTable({
     } finally {
       setLoading(false);
     }
-  }
+  };
 
+  // Fetch when page, pageSize, or searchTerm changes
   useEffect(() => {
     fetchDeliveries(currentPage, pageSize, searchTerm);
   }, [currentPage, pageSize, searchTerm]);
 
+  // Reset search if input cleared
   useEffect(() => {
     if (searchInput === "") {
       setCurrentPage(1);
@@ -134,6 +141,7 @@ export default function DeliveryTable({
         <Button onClick={handleSearch}>Search</Button>
       </div>
 
+      {/* Table */}
       <Table>
         <TableHeader>
           {table.getHeaderGroups().map((headerGroup) => (
