@@ -20,13 +20,16 @@ import {
 } from "@/components/ui/sidebar";
 
 import { auth } from "@/lib/firebase";
-import { User } from "firebase/auth";
+import { signOut, User } from "firebase/auth";
 import { generateIdenteapot } from "@teapotlabs/identeapots";
+import { useRouter } from "next/navigation";
 
 export function NavUser() {
   const { isMobile } = useSidebar();
   const [user, setUser] = useState<User | null>(null);
   const [identicon, setIdenticon] = useState<string>("");
+
+  const router = useRouter();
 
   useEffect(() => {
     if (user != null) {
@@ -58,6 +61,15 @@ export function NavUser() {
     email: user.email || "",
     avatar: user.photoURL || "",
   };
+
+  async function logOut() {
+    try {
+      await signOut(auth);
+      router.push("/login");
+    } catch (error) {
+      alert("Something went wrong");
+    }
+  }
 
   return (
     <SidebarMenu>
@@ -103,7 +115,7 @@ export function NavUser() {
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuSeparator />
-            <DropdownMenuItem>
+            <DropdownMenuItem onClick={logOut}>
               <LogOut />
               Log out
             </DropdownMenuItem>
