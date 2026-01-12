@@ -148,7 +148,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <NavSecondary items={data.navAssets} title="Assets & Resources" />
 
         {/* Finance */}
-        <NavSecondary items={data.navFinance} title="Accounting" />
+        {/* <NavSecondary items={data.navFinance} title="Accounting" /> */}
 
         {/* Secondary / Utility */}
         {/* <NavSecondary items={data.navSecondary} title="System" /> */}

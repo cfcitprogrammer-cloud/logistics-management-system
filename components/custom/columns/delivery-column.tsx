@@ -1,5 +1,6 @@
 import { ColumnDef } from "@tanstack/react-table";
 import { Delivery } from "@/db/types/delivery";
+import { shortenAddress } from "@/lib/address";
 
 export const warehouseColumns: ColumnDef<Delivery>[] = [
   {
@@ -15,7 +16,7 @@ export const warehouseColumns: ColumnDef<Delivery>[] = [
   {
     accessorKey: "DELIVERY ADDRESS",
     header: "Delivery Address",
-    cell: (info) => info.getValue(),
+    cell: (info) => shortenAddress(info.getValue() as string),
   },
   {
     accessorKey: "STATUS",

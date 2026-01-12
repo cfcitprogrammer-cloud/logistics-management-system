@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Card,
   CardHeader,
@@ -21,10 +21,11 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Ellipsis, Info, Package, Plus } from "lucide-react";
+import { Ellipsis, Info, Package, Plus, Truck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import NewDeliveriesDialog from "@/components/custom/dialogs/new-deliveries-dialog";
+import DeliveryViewCard from "@/components/custom/deliveries/delivery-view";
 
 export default function DeliveriesPage() {
   const [selectedDelivery, setSelectedDelivery] = useState<Delivery | null>(
@@ -40,66 +41,21 @@ export default function DeliveriesPage() {
     setIsNewDeliveryOpen(true);
   };
 
+  useEffect(() => {
+    console.log(selectedDelivery);
+  }, [selectedDelivery]);
+
   return (
-    <section className="p-4 grid grid-cols-1 md:grid-cols-3 gap-4">
-      {/* All Deliveries */}
-      <Card className="md:col-span-2">
-        <CardHeader>
-          <CardTitle>All Deliveries</CardTitle>
-          <CardDescription>
-            Updated as of{" "}
-            {new Date().toLocaleString("en-US", {
-              month: "long",
-              day: "numeric",
-              year: "numeric",
-              hour: "numeric",
-              minute: "2-digit",
-              hour12: true,
-            })}
-          </CardDescription>
-
-          <CardAction>
-            <Link href={"/d/deliveries/new"}>
-              <Button size="sm">
-                <Plus /> Add New Delivery
-              </Button>
-            </Link>
-          </CardAction>
-        </CardHeader>
-
-        <CardContent>
-          <DeliveryTable
-            columns={warehouseColumns}
-            onSelect={setSelectedDelivery}
-          />
-        </CardContent>
-      </Card>
-
-      {/* Delivery Details */}
-      {selectedDelivery && (
-        <Card className="md:col-span-1">
-          <CardHeader>
-            <CardTitle>
-              Delivery Details - {selectedDelivery["PO ID"]}
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-2">
-            <p>
-              <strong>PO ID:</strong> {selectedDelivery["PO ID"]}
-            </p>
-            <p>
-              <strong>Status:</strong> {selectedDelivery.STATUS}
-            </p>
-            <p>
-              <strong>Delivery Date:</strong>{" "}
-              {new Date(selectedDelivery["DELIVERY DATE"]).toLocaleDateString()}
-            </p>
-          </CardContent>
-        </Card>
-      )}
+    <section className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <header className="col-span-full border-0 border-l-4 pl-2 border-l-primary">
+        <h1 className="text-lg font-semibold">Deliveries</h1>
+        <p className="text-sm">
+          Track, manage, and monitor all your shipments in real time
+        </p>
+      </header>
 
       {/* Ready for Delivery */}
-      <Card className="md:col-span-2">
+      <Card className="col-span-full">
         <CardHeader>
           <CardTitle>Ready for Delivery</CardTitle>
           <CardDescription>
@@ -152,6 +108,42 @@ export default function DeliveriesPage() {
           />
         </CardContent>
       </Card>
+
+      {/* All Deliveries */}
+      <Card className={selectedDelivery ? "md:col-span-2" : "md:col-span-full"}>
+        <CardHeader>
+          <CardTitle>All Deliveries</CardTitle>
+          <CardDescription>
+            Updated as of{" "}
+            {new Date().toLocaleString("en-US", {
+              month: "long",
+              day: "numeric",
+              year: "numeric",
+              hour: "numeric",
+              minute: "2-digit",
+              hour12: true,
+            })}
+          </CardDescription>
+
+          <CardAction>
+            <div className="bg-primary text-primary-foreground rounded-xl p-2">
+              <Truck />
+            </div>
+          </CardAction>
+        </CardHeader>
+
+        <CardContent>
+          <DeliveryTable
+            columns={warehouseColumns}
+            onSelect={setSelectedDelivery}
+          />
+        </CardContent>
+      </Card>
+
+      {/* Delivery Details */}
+      {selectedDelivery && (
+        <DeliveryViewCard selectedDelivery={selectedDelivery} />
+      )}
 
       {/* ✅ Dialog shown ONLY when prep is clicked */}
       <NewDeliveriesDialog

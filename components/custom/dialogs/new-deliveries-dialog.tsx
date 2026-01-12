@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
@@ -15,13 +15,34 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { PO } from "@/db/types/po";
-import { newDeliverySchema, NewDeliveryFormValues } from "@/db/schema/delivery"; // or same file
+import { newDeliverySchema, NewDeliveryFormValues } from "@/db/schema/delivery";
+import { useDebounce } from "@/hooks/use-debounce";
 import axios from "axios";
+import { MapContainer, TileLayer, Marker, useMapEvents } from "react-leaflet";
+import "leaflet/dist/leaflet.css";
 
 interface NewDeliveriesDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   po: PO | null;
+}
+
+// Map picker component
+function MapPicker({
+  onSelect,
+}: {
+  onSelect: (latlng: [number, number]) => void;
+}) {
+  const [markerPos, setMarkerPos] = useState<[number, number] | null>(null);
+
+  useMapEvents({
+    click(e) {
+      setMarkerPos([e.latlng.lat, e.latlng.lng]);
+      onSelect([e.latlng.lat, e.latlng.lng]);
+    },
+  });
+
+  return markerPos ? <Marker position={markerPos} /> : null;
 }
 
 export default function NewDeliveriesDialog({
@@ -33,33 +54,88 @@ export default function NewDeliveriesDialog({
     register,
     handleSubmit,
     reset,
+    setValue,
     formState: { errors, isSubmitting },
   } = useForm<NewDeliveryFormValues>({
     resolver: zodResolver(newDeliverySchema),
     defaultValues: {
-      deliveryAddress: "",
+      fromLocation: "",
+      toLocation: "",
+      fromLat: 0,
+      fromLng: 0,
+      toLat: 0,
+      toLng: 0,
       deliveryDate: "",
       trackingId: "",
+      courier: "",
     },
   });
 
-  /* =========================
-     Prefill from PO
-  ========================= */
+  // States for inputs and dropdowns
+  const [fromInput, setFromInput] = useState("");
+  const [toInput, setToInput] = useState("");
+  const [fromSuggestions, setFromSuggestions] = useState<any[]>([]);
+  const [toSuggestions, setToSuggestions] = useState<any[]>([]);
+  const [fromDropdownOpen, setFromDropdownOpen] = useState(false);
+  const [toDropdownOpen, setToDropdownOpen] = useState(false);
+  const [showFromMap, setShowFromMap] = useState(false);
+  const [showToMap, setShowToMap] = useState(false);
+
+  const debouncedFrom = useDebounce(fromInput, 400);
+  const debouncedTo = useDebounce(toInput, 400);
+
+  // Prefill from PO
   useEffect(() => {
     if (!po) return;
 
     reset({
-      deliveryAddress: po["DELIVERY ADDRESS"] || "",
+      fromLocation: "",
+      toLocation: po["DELIVERY ADDRESS"] || "",
+      fromLat: 0,
+      fromLng: 0,
+      toLat: 0,
+      toLng: 0,
       deliveryDate: "",
       trackingId: "",
+      courier: "",
     });
+
+    setToInput(po["DELIVERY ADDRESS"] || "");
   }, [po, reset]);
 
-  /* =========================
-     Submit
-  ========================= */
+  // Fetch Nominatim suggestions
+  const handleAutocomplete = async (value: string, type: "from" | "to") => {
+    if (!value) {
+      type === "from" ? setFromSuggestions([]) : setToSuggestions([]);
+      return;
+    }
 
+    try {
+      const res = await fetch(
+        `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(
+          value
+        )}&format=jsonv2&addressdetails=1&limit=5`
+      );
+      const data = await res.json();
+      if (type === "from") setFromSuggestions(data);
+      else setToSuggestions(data);
+    } catch (err) {
+      console.error("Nominatim error:", err);
+    }
+  };
+
+  // Debounced search
+  useEffect(() => {
+    if (debouncedFrom) handleAutocomplete(debouncedFrom, "from");
+    else setFromSuggestions([]);
+  }, [debouncedFrom]);
+
+  useEffect(() => {
+    if (debouncedTo) handleAutocomplete(debouncedTo, "to");
+    else setToSuggestions([]);
+  }, [debouncedTo]);
+
+  // Submit
   const onSubmit = async (values: NewDeliveryFormValues) => {
     if (!po) return;
 
@@ -67,30 +143,30 @@ export default function NewDeliveriesDialog({
       action: "deliveries",
       path: "create",
       poId: po.ID,
-      deliveryAddress: values.deliveryAddress,
+      fromLocation: values.fromLocation,
+      toLocation: values.toLocation,
+      fromLat: values.fromLat,
+      fromLng: values.fromLng,
+      toLat: values.toLat,
+      toLng: values.toLng,
       deliveryDate: values.deliveryDate,
       trackingId: values.trackingId || "",
+      courier: values.courier,
     };
 
     try {
-      console.log("Sending delivery payload:", payload);
-
       const response = await axios.post(
         process.env.NEXT_PUBLIC_GAS_LINK || "",
         JSON.stringify(payload)
       );
 
       if (response.data?.success) {
-        console.log("Delivery created:", response.data.data);
-        // ✅ optionally show toast
         alert("Delivery created successfully!");
         onOpenChange(false);
       } else {
-        console.error("Failed to create delivery:", response.data?.message);
         alert(`Error: ${response.data?.message || "Unknown error"}`);
       }
     } catch (error: any) {
-      console.error("Axios error creating delivery:", error);
       alert(`Error creating delivery: ${error.message}`);
     }
   };
@@ -117,16 +193,190 @@ export default function NewDeliveriesDialog({
               <Input value={po.ID} disabled />
             </div>
 
-            {/* Delivery Address */}
-            <div className="space-y-1">
-              <Label htmlFor="deliveryAddress">Delivery Address</Label>
-              <Input id="deliveryAddress" {...register("deliveryAddress")} />
-              {errors.deliveryAddress && (
+            {/* Hidden fields for coordinates */}
+            <input type="hidden" {...register("fromLat")} />
+            <input type="hidden" {...register("fromLng")} />
+            <input type="hidden" {...register("toLat")} />
+            <input type="hidden" {...register("toLng")} />
+
+            {/* From Location */}
+            <div className="space-y-1 relative">
+              <Label htmlFor="fromLocation">From Location</Label>
+              <Input
+                id="fromLocation"
+                {...register("fromLocation")}
+                autoComplete="off"
+                value={fromInput}
+                onFocus={() => setFromDropdownOpen(true)}
+                onChange={(e) => {
+                  setFromInput(e.target.value);
+                  setValue("fromLocation", e.target.value);
+                  setFromDropdownOpen(true);
+                }}
+                onBlur={() => setTimeout(() => setFromDropdownOpen(false), 150)}
+              />
+
+              {fromDropdownOpen && (
+                <ul className="absolute z-50 bg-white border rounded w-full max-h-40 overflow-y-auto mt-1 shadow">
+                  {fromSuggestions.length > 0 ? (
+                    fromSuggestions.map((s, i) => (
+                      <li
+                        key={i}
+                        className="px-2 py-1 hover:bg-gray-100 cursor-pointer"
+                        onMouseDown={() => {
+                          setFromInput(s.display_name);
+                          setValue("fromLocation", s.display_name);
+                          setValue("fromLat", parseFloat(s.lat));
+                          setValue("fromLng", parseFloat(s.lon));
+                          setFromSuggestions([]);
+                          setFromDropdownOpen(false);
+                        }}
+                      >
+                        {s.display_name}
+                      </li>
+                    ))
+                  ) : (
+                    <li className="px-2 py-1 text-sm text-muted-foreground">
+                      No results found
+                      <p
+                        className="mt-1 cursor-pointer text-blue-500 hover:underline"
+                        onMouseDown={() => setShowFromMap(true)}
+                      >
+                        Pick on map
+                      </p>
+                    </li>
+                  )}
+                </ul>
+              )}
+              {errors.fromLocation && (
                 <p className="text-sm text-destructive">
-                  {errors.deliveryAddress.message}
+                  {errors.fromLocation.message}
                 </p>
               )}
             </div>
+
+            {/* To Location */}
+            <div className="space-y-1 relative">
+              <Label htmlFor="toLocation">To / Delivery Address</Label>
+              <Input
+                id="toLocation"
+                {...register("toLocation")}
+                autoComplete="off"
+                value={toInput}
+                onFocus={() => setToDropdownOpen(true)}
+                onChange={(e) => {
+                  setToInput(e.target.value);
+                  setValue("toLocation", e.target.value);
+                  setToDropdownOpen(true);
+                }}
+                onBlur={() => setTimeout(() => setToDropdownOpen(false), 150)}
+              />
+              {toDropdownOpen && (
+                <ul className="absolute z-50 bg-white border rounded w-full max-h-40 overflow-y-auto mt-1 shadow">
+                  {toSuggestions.length > 0 ? (
+                    toSuggestions.map((s, i) => (
+                      <li
+                        key={i}
+                        className="px-2 py-1 hover:bg-gray-100 cursor-pointer"
+                        onMouseDown={() => {
+                          setToInput(s.display_name);
+                          setValue("toLocation", s.display_name);
+                          setValue("toLat", parseFloat(s.lat));
+                          setValue("toLng", parseFloat(s.lon));
+                          setToSuggestions([]);
+                          setToDropdownOpen(false);
+                        }}
+                      >
+                        {s.display_name}
+                      </li>
+                    ))
+                  ) : (
+                    <li className="px-2 py-1 text-sm text-muted-foreground">
+                      No results found
+                      <p
+                        className="mt-1 cursor-pointer text-blue-500 hover:underline"
+                        onMouseDown={() => setShowToMap(true)}
+                      >
+                        Pick on map
+                      </p>
+                    </li>
+                  )}
+                </ul>
+              )}
+              {errors.toLocation && (
+                <p className="text-sm text-destructive">
+                  {errors.toLocation.message}
+                </p>
+              )}
+            </div>
+
+            {/* Map Pickers */}
+            {showFromMap && (
+              <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center">
+                <div className="bg-white rounded w-11/12 max-w-md p-4">
+                  <h3 className="font-semibold mb-2">Pick From Location</h3>
+                  <MapContainer
+                    center={[14.5995, 120.9842]}
+                    zoom={13}
+                    className="h-64 w-full"
+                  >
+                    <TileLayer
+                      url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                      attribution=""
+                    />
+                    <MapPicker
+                      onSelect={(latlng) => {
+                        setValue("fromLocation", `${latlng[0]}, ${latlng[1]}`);
+                        setFromInput(`${latlng[0]}, ${latlng[1]}`);
+                        setValue("fromLat", latlng[0]);
+                        setValue("fromLng", latlng[1]);
+                        setShowFromMap(false);
+                        setFromSuggestions([]);
+                        setFromDropdownOpen(false);
+                      }}
+                    />
+                  </MapContainer>
+                  <Button
+                    className="mt-2"
+                    onClick={() => setShowFromMap(false)}
+                  >
+                    Close
+                  </Button>
+                </div>
+              </div>
+            )}
+
+            {showToMap && (
+              <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center">
+                <div className="bg-white rounded w-11/12 max-w-md p-4">
+                  <h3 className="font-semibold mb-2">Pick To Location</h3>
+                  <MapContainer
+                    center={[14.5995, 120.9842]}
+                    zoom={13}
+                    className="h-64 w-full"
+                  >
+                    <TileLayer
+                      url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                      attribution=""
+                    />
+                    <MapPicker
+                      onSelect={(latlng) => {
+                        setValue("toLocation", `${latlng[0]}, ${latlng[1]}`);
+                        setToInput(`${latlng[0]}, ${latlng[1]}`);
+                        setValue("toLat", latlng[0]);
+                        setValue("toLng", latlng[1]);
+                        setShowToMap(false);
+                        setToSuggestions([]);
+                        setToDropdownOpen(false);
+                      }}
+                    />
+                  </MapContainer>
+                  <Button className="mt-2" onClick={() => setShowToMap(false)}>
+                    Close
+                  </Button>
+                </div>
+              </div>
+            )}
 
             {/* Delivery Date */}
             <div className="space-y-1">
@@ -139,6 +389,17 @@ export default function NewDeliveriesDialog({
               {errors.deliveryDate && (
                 <p className="text-sm text-destructive">
                   {errors.deliveryDate.message}
+                </p>
+              )}
+            </div>
+
+            {/* Courier */}
+            <div className="space-y-1">
+              <Label htmlFor="courier">Courier</Label>
+              <Input id="courier" {...register("courier")} />
+              {errors.courier && (
+                <p className="text-sm text-destructive">
+                  {errors.courier.message}
                 </p>
               )}
             </div>

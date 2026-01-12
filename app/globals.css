@@ -210,3 +210,7 @@
     letter-spacing: var(--tracking-normal);
   }
 }
+
+.leaflet-control-attribution {
+  display: none !important;
+}

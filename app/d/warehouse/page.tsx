@@ -51,14 +51,6 @@ export default function WarehousePage() {
           <Button onClick={() => router.push("/d/warehouse/new")}>
             New Stock
           </Button>
-
-          {/* Adjust Stock for selected row */}
-          <Button
-            disabled={!selectedItem}
-            onClick={() => router.push(`/warehouse/adjust/${selectedItem?.ID}`)}
-          >
-            Adjust Stock
-          </Button>
         </CardAction>
       </CardHeader>
 
