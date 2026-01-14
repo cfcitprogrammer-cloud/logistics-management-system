@@ -9,6 +9,7 @@ export type Delivery = {
   "TRACKING ID"?: string;
   "RECEIPT FILE": string;
   "DELIVERY DATETIME"?: string; // ISO date string
+  "RECEIVE DATE"?: string; // ISO date string
   "LAST UPDATED"?: string; // ISO date string
   LAT?: number; // delivery latitude
   LONG?: number; // delivery longitude
@@ -18,4 +19,5 @@ export type Delivery = {
   LONGTO?: number; // to longitude
   COURIER?: string;
   FROM?: string; // from address
+  ATTACHMENT?: string;
 };

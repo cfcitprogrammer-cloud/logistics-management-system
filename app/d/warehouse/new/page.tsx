@@ -14,9 +14,20 @@ import { Spinner } from "@/components/ui/spinner";
 
 import { warehouseStockSchema } from "@/db/schema/warehouse-stock";
 import axios from "axios";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 
 export default function NewWarehouseStockPage() {
   const [loading, setLoading] = useState(false);
+  const [open, setOpen] = useState(false);
+  const [title, setTitle] = useState("");
+  const [subtitle, setSubtitle] = useState("");
 
   const form = useForm<z.infer<typeof warehouseStockSchema>>({
     resolver: zodResolver(warehouseStockSchema),
@@ -35,10 +46,9 @@ export default function NewWarehouseStockPage() {
 
   async function onSubmit(data: z.infer<typeof warehouseStockSchema>) {
     setLoading(true);
-    try {
-      console.log("Warehouse stock payload:", data);
 
-      const res = await axios.post(
+    try {
+      await axios.post(
         process.env.NEXT_PUBLIC_GAS_LINK || "",
         {
           action: "warehouse",
@@ -50,19 +60,23 @@ export default function NewWarehouseStockPage() {
         }
       );
 
-      console.log("Response:", res.data);
-      alert("Stock item created successfully");
+      setTitle("Stock Item Created");
+      setSubtitle(
+        "The stock item has been successfully added to the warehouse inventory. You can now manage its stock levels and details from the inventory list."
+      );
+
+      setOpen(true);
       form.reset();
     } catch (err: any) {
       console.error("Stock creation failed:", err);
 
-      // Axios errors may have response data
-      if (err.response) {
-        console.error("Server response:", err.response.data);
-        alert(`Error: ${err.response.data.message || "Something went wrong."}`);
-      } else {
-        alert("Something went wrong.");
-      }
+      setTitle("Failed to Create Stock Item");
+      setSubtitle(
+        err?.response?.data?.message ||
+          "Something went wrong while creating the stock item. Please try again."
+      );
+
+      setOpen(true);
     } finally {
       setLoading(false);
     }
@@ -153,7 +167,11 @@ export default function NewWarehouseStockPage() {
                 render={({ field }) => (
                   <Field>
                     <FieldLabel>Current Stock</FieldLabel>
-                    <Input type="number" {...field} />
+                    <Input
+                      type="number"
+                      {...field}
+                      onChange={(e) => field.onChange(e.target.valueAsNumber)}
+                    />
                   </Field>
                 )}
               />
@@ -165,7 +183,11 @@ export default function NewWarehouseStockPage() {
                 render={({ field }) => (
                   <Field>
                     <FieldLabel>Reserved Stock</FieldLabel>
-                    <Input type="number" {...field} />
+                    <Input
+                      type="number"
+                      {...field}
+                      onChange={(e) => field.onChange(e.target.valueAsNumber)}
+                    />
                   </Field>
                 )}
               />
@@ -178,7 +200,11 @@ export default function NewWarehouseStockPage() {
                   render={({ field }) => (
                     <Field>
                       <FieldLabel>Min Level</FieldLabel>
-                      <Input type="number" {...field} />
+                      <Input
+                        type="number"
+                        {...field}
+                        onChange={(e) => field.onChange(e.target.valueAsNumber)}
+                      />
                     </Field>
                   )}
                 />
@@ -189,7 +215,11 @@ export default function NewWarehouseStockPage() {
                   render={({ field }) => (
                     <Field>
                       <FieldLabel>Max Level</FieldLabel>
-                      <Input type="number" {...field} />
+                      <Input
+                        type="number"
+                        {...field}
+                        onChange={(e) => field.onChange(e.target.valueAsNumber)}
+                      />
                     </Field>
                   )}
                 />
@@ -216,6 +246,15 @@ export default function NewWarehouseStockPage() {
           </Card>
         </div>
       </form>
+
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{title}</DialogTitle>
+            <DialogDescription>{subtitle}</DialogDescription>
+          </DialogHeader>
+        </DialogContent>
+      </Dialog>
     </section>
   );
 }

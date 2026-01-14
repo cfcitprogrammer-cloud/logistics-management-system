@@ -1,9 +1,8 @@
-"use client";
-
-import { Clock, Package, Truck, CheckCircle } from "lucide-react";
+import { Clock, Truck, CheckCircle } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { formatDateTime } from "@/lib/date";
 import { Delivery } from "@/db/types/delivery";
+import { shortenAddress } from "@/lib/address";
 
 export default function TrackingTimeline({
   selectedDelivery,
@@ -17,12 +16,14 @@ export default function TrackingTimeline({
 
       <div className="flex flex-col relative ml-4">
         {/* Vertical line */}
-        <div className="absolute left-1 top-2 bottom-0 w-0.5 bg-gray-300"></div>
+        {selectedDelivery.STATUS != "Pending" && (
+          <div className="absolute left-1 top-2 bottom-0 w-0.5 bg-gray-300"></div>
+        )}
 
         {/* Order Placed */}
         <div className="flex items-start mb-6 relative">
           <div className="flex flex-col items-center mr-4">
-            <div className="bg-white p-1 rounded-full border border-gray-300">
+            <div className="bg-background p-1 rounded-full border border-gray-300">
               <Clock className="w-4 h-4 text-blue-500" />
             </div>
           </div>
@@ -40,38 +41,44 @@ export default function TrackingTimeline({
         </div>
 
         {/* In Transit */}
-        <div className="flex items-start mb-6 relative">
-          <div className="flex flex-col items-center mr-4">
-            <div className="bg-white p-1 rounded-full border border-gray-300">
-              <Truck className="w-4 h-4 text-blue-500" />
+        {selectedDelivery.STATUS != "Pending" && (
+          <div className="flex items-start mb-6 relative">
+            <div className="flex flex-col items-center mr-4">
+              <div className="bg-background p-1 rounded-full border border-gray-300">
+                <Truck className="w-4 h-4 text-blue-500" />
+              </div>
+            </div>
+            <div>
+              <p className="text-sm font-semibold">In Transit</p>
+              <p className="text-xs text-muted-foreground">
+                {formatDateTime(selectedDelivery["LAST UPDATED"]!)}
+              </p>
+              <p className="text-xs text-muted-foreground">
+                <strong>Location: </strong>
+                {shortenAddress(selectedDelivery["LAST LOCATION"])}
+              </p>
             </div>
           </div>
-          <div>
-            <p className="text-sm font-semibold">In Transit</p>
-            <p className="text-xs text-muted-foreground">
-              {formatDateTime("2026-01-11T08:45:00Z")}
-            </p>
-            <p className="text-xs text-muted-foreground">
-              <strong>Location: </strong>
-              {selectedDelivery["LAST LOCATION"]}
-            </p>
-          </div>
-        </div>
+        )}
 
         {/* Delivered */}
-        <div className="flex items-start mb-6 relative">
-          <div className="flex flex-col items-center mr-4">
-            <div className="bg-white p-1 rounded-full border border-gray-300">
-              <CheckCircle className="w-4 h-4 text-green-500" />
+        {(selectedDelivery.STATUS == "Delivered" ||
+          selectedDelivery.STATUS == "Returned") && (
+          <div className="flex items-start mb-6 relative">
+            <div className="flex flex-col items-center mr-4">
+              <div className="bg-background p-1 rounded-full border border-gray-300">
+                <CheckCircle className="w-4 h-4 text-green-500" />
+              </div>
+            </div>
+            <div>
+              <p className="text-sm font-semibold">{selectedDelivery.STATUS}</p>
+              <p className="text-xs text-muted-foreground">
+                {formatDateTime(selectedDelivery["RECEIVE DATE"]!)}
+              </p>
+              <a href={selectedDelivery["RECEIPT FILE"]}>View Attachment</a>
             </div>
           </div>
-          <div>
-            <p className="text-sm font-semibold">Delivered</p>
-            <p className="text-xs text-muted-foreground">
-              {formatDateTime("2026-01-12T14:15:00Z")}
-            </p>
-          </div>
-        </div>
+        )}
       </div>
     </div>
   );

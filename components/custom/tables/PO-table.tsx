@@ -90,6 +90,8 @@ export default function POTable({
         },
       });
 
+      console.log(response.data);
+
       setData(response.data?.data || []);
       const total = response.data?.totalPages || 1;
       setMaxPage(Math.ceil(total / limit));
@@ -135,7 +137,9 @@ export default function POTable({
           onChange={(e) => setSearchInput(e.target.value)}
           onKeyDown={handleKeyDown}
         />
-        <Button onClick={handleSearch}>Search</Button>
+        <Button onClick={handleSearch} disabled={loading}>
+          Search
+        </Button>
       </div>
 
       <Table>
@@ -211,13 +215,13 @@ export default function POTable({
           <ButtonGroup>
             <Button
               onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
-              disabled={currentPage === 1}
+              disabled={currentPage === 1 || loading}
             >
               Prev
             </Button>
             <Button
               onClick={() => setCurrentPage((p) => Math.min(p + 1, maxPage))}
-              disabled={currentPage === maxPage}
+              disabled={currentPage === maxPage || loading}
             >
               Next
             </Button>

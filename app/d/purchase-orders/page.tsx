@@ -63,13 +63,16 @@ export default function PurchaseOrdersPage() {
 
   return (
     <section>
+      <header className="col-span-full border-0 border-l-4 pl-2 border-l-primary mb-4">
+        <h1 className="text-lg font-semibold">Purchase Orders</h1>
+        <p className="text-sm">
+          Monitor procurement, approvals, and order status in real time
+        </p>
+      </header>
+
       <div className="flex gap-4">
         {/* TABLE */}
-        <Card
-          className={`${
-            selectedPO ? "w-2/3" : "w-full"
-          } rounded-xl bg-white shadow-sm`}
-        >
+        <Card className={`${selectedPO ? "w-2/3" : "w-full"}`}>
           <CardHeader>
             <CardTitle>Purchase Orders</CardTitle>
             <CardDescription>
@@ -164,6 +167,10 @@ export default function PurchaseOrdersPage() {
                         </DropdownMenuItem>
                       </DropdownMenuSubContent>
                     </DropdownMenuSub>
+
+                    <DropdownMenuItem onClick={() => console.log("cancel")}>
+                      Cancel PO
+                    </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
               )}

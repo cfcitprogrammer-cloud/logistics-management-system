@@ -20,6 +20,7 @@ import { useDebounce } from "@/hooks/use-debounce";
 import axios from "axios";
 import { MapContainer, TileLayer, Marker, useMapEvents } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
+import { toast } from "sonner";
 
 interface NewDeliveriesDialogProps {
   open: boolean;
@@ -161,13 +162,24 @@ export default function NewDeliveriesDialog({
       );
 
       if (response.data?.success) {
-        alert("Delivery created successfully!");
+        reset({
+          fromLocation: "",
+          toLocation: "",
+          fromLat: 0,
+          fromLng: 0,
+          toLat: 0,
+          toLng: 0,
+          deliveryDate: "",
+          trackingId: "",
+          courier: "",
+        });
+        toast.success("Delivery created successfully!");
         onOpenChange(false);
       } else {
-        alert(`Error: ${response.data?.message || "Unknown error"}`);
+        toast.error(`Error: ${response.data?.message || "Unknown error"}`);
       }
     } catch (error: any) {
-      alert(`Error creating delivery: ${error.message}`);
+      toast.error(`Error creating delivery: ${error.message}`);
     }
   };
 
@@ -217,12 +229,12 @@ export default function NewDeliveriesDialog({
               />
 
               {fromDropdownOpen && (
-                <ul className="absolute z-50 bg-white border rounded w-full max-h-40 overflow-y-auto mt-1 shadow">
+                <ul className="absolute z-50 bg-background border rounded w-full max-h-40 overflow-y-auto mt-1 shadow">
                   {fromSuggestions.length > 0 ? (
                     fromSuggestions.map((s, i) => (
                       <li
                         key={i}
-                        className="px-2 py-1 hover:bg-gray-100 cursor-pointer"
+                        className="px-2 py-1 hover:bg-accent cursor-pointer"
                         onMouseDown={() => {
                           setFromInput(s.display_name);
                           setValue("fromLocation", s.display_name);
@@ -272,12 +284,12 @@ export default function NewDeliveriesDialog({
                 onBlur={() => setTimeout(() => setToDropdownOpen(false), 150)}
               />
               {toDropdownOpen && (
-                <ul className="absolute z-50 bg-white border rounded w-full max-h-40 overflow-y-auto mt-1 shadow">
+                <ul className="absolute z-50 bg-background border rounded w-full max-h-40 overflow-y-auto mt-1 shadow">
                   {toSuggestions.length > 0 ? (
                     toSuggestions.map((s, i) => (
                       <li
                         key={i}
-                        className="px-2 py-1 hover:bg-gray-100 cursor-pointer"
+                        className="px-2 py-1 hover:bg-accent cursor-pointer"
                         onMouseDown={() => {
                           setToInput(s.display_name);
                           setValue("toLocation", s.display_name);
@@ -313,7 +325,7 @@ export default function NewDeliveriesDialog({
             {/* Map Pickers */}
             {showFromMap && (
               <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center">
-                <div className="bg-white rounded w-11/12 max-w-md p-4">
+                <div className="bg-background rounded w-11/12 max-w-md p-4">
                   <h3 className="font-semibold mb-2">Pick From Location</h3>
                   <MapContainer
                     center={[14.5995, 120.9842]}
@@ -348,7 +360,7 @@ export default function NewDeliveriesDialog({
 
             {showToMap && (
               <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center">
-                <div className="bg-white rounded w-11/12 max-w-md p-4">
+                <div className="bg-background rounded w-11/12 max-w-md p-4">
                   <h3 className="font-semibold mb-2">Pick To Location</h3>
                   <MapContainer
                     center={[14.5995, 120.9842]}

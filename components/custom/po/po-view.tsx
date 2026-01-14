@@ -12,6 +12,14 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Spinner } from "@/components/ui/spinner";
 
 type POWithItems = PO & { items: POItem[] };
 
@@ -58,107 +66,118 @@ export default function POView({ currentPO }: POViewProps) {
   if (!currentPO) return null;
 
   return (
-    <aside className="w-1/3 p-4 rounded-xl bg-white shadow-sm">
-      <h2 className="text-lg font-semibold mb-2">PO Details</h2>
+    <Card className="w-1/3">
+      <CardHeader>
+        <CardTitle>PO Details</CardTitle>
+        <CardDescription>All about your purchase order</CardDescription>
+      </CardHeader>
 
-      {loading ? (
-        <p>Loading...</p>
-      ) : sidePO ? (
-        <div className="text-sm grid grid-cols-2 gap-2">
-          <p>
-            <strong>PO Number:</strong> <br />
-            {sidePO["PO NUMBER"]}
-          </p>
-          <p>
-            <strong>Issue Date:</strong> <br />
-            {new Date(sidePO["ISSUE DATE"]).toLocaleDateString()}
-          </p>
-          <p>
-            <strong>Supplier:</strong> <br /> {sidePO["SUPPLIER NAME"]}
-          </p>
-          <p>
-            <strong>Recipient:</strong> <br /> {sidePO["RECIPIENT NAME"]}
-          </p>
-          <p>
-            <strong>Delivery Address:</strong> <br />{" "}
-            {sidePO["DELIVERY ADDRESS"]}
-          </p>
-          <p>
-            <strong>Remarks:</strong> <br /> {sidePO["REMARKS"]}
-          </p>
-          <p>
-            <strong>Created At:</strong> <br />
-            {new Date(sidePO["CREATED AT"]).toLocaleString()}
-          </p>
-          <p>
-            <strong>Accounting Approval:</strong> <br />
-            {sidePO["ACCOUNTING APPROVAL"] || "Pending"}
-          </p>
-          <p>
-            <strong>Warehouse Approval:</strong> <br />
-            {sidePO["WAREHOUSE APPROVAL"] || "Pending"}
-          </p>
-          <p>
-            <strong>File:</strong> <br />
-            {sidePO["FILE"] && (
-              <a
-                href={sidePO["FILE"]}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-blue-600 underline"
-              >
-                View
-              </a>
+      <CardContent>
+        {loading ? (
+          <Spinner className="mx-auto" />
+        ) : sidePO ? (
+          <div className="text-sm grid grid-cols-2 gap-2">
+            <p>
+              <strong>PO Number:</strong> <br />
+              {sidePO["PO NUMBER"]}
+            </p>
+            <p>
+              <strong>Issue Date:</strong> <br />
+              {new Date(sidePO["ISSUE DATE"]).toLocaleDateString()}
+            </p>
+            <p>
+              <strong>Supplier:</strong> <br /> {sidePO["SUPPLIER NAME"]}
+            </p>
+            <p>
+              <strong>Recipient:</strong> <br /> {sidePO["RECIPIENT NAME"]}
+            </p>
+            <p>
+              <strong>Delivery Address:</strong> <br />{" "}
+              {sidePO["DELIVERY ADDRESS"]}
+            </p>
+            <p>
+              <strong>Remarks:</strong> <br /> {sidePO["REMARKS"]}
+            </p>
+            <p>
+              <strong>Created At:</strong> <br />
+              {new Date(sidePO["CREATED AT"]).toLocaleString()}
+            </p>
+            <p>
+              <strong>Accounting Approval:</strong> <br />
+              {sidePO["ACCOUNTING APPROVAL"] || "Pending"}
+            </p>
+            <p>
+              <strong>Warehouse Approval:</strong> <br />
+              {sidePO["WAREHOUSE APPROVAL"] || "Pending"}
+            </p>
+            <p>
+              <strong>File:</strong> <br />
+              {sidePO["FILE"] && (
+                <a
+                  href={sidePO["FILE"]}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-blue-600 underline"
+                >
+                  View
+                </a>
+              )}
+            </p>
+
+            {sidePO.items.length > 0 ? (
+              <div className="col-span-full">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Item Description</TableHead>
+                      <TableHead>Qty</TableHead>
+                      <TableHead>UOM</TableHead>
+                      <TableHead className="text-right">Unit Price</TableHead>
+                    </TableRow>
+                  </TableHeader>
+
+                  <TableBody>
+                    {sidePO.items?.map((item, index) => (
+                      <TableRow key={index}>
+                        <TableCell className="font-medium">
+                          {item["ITEM DESCRIPTION"]}
+                        </TableCell>
+                        <TableCell>{item.QTY}</TableCell>
+                        <TableCell>{item.UOM}</TableCell>
+                        <TableCell className="text-right">
+                          ₱ {(item["UNIT PRICE"] * item.QTY).toFixed(2)}
+                        </TableCell>
+                      </TableRow>
+                    ))}
+
+                    {/* TOTAL ROW */}
+                    <TableRow className="font-semibold border-t">
+                      <TableCell colSpan={3} className="text-right">
+                        Total
+                      </TableCell>
+                      <TableCell className="text-right">
+                        ₱{" "}
+                        {sidePO.items
+                          ?.reduce(
+                            (sum, item) => sum + item.QTY * item["UNIT PRICE"],
+                            0
+                          )
+                          .toFixed(2)}
+                      </TableCell>
+                    </TableRow>
+                  </TableBody>
+                </Table>
+              </div>
+            ) : (
+              <p className="text-xs text-muted-foreground text-center col-span-2">
+                No items declared.
+              </p>
             )}
-          </p>
-
-          <div className="col-span-full">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Item Description</TableHead>
-                  <TableHead>Qty</TableHead>
-                  <TableHead>UOM</TableHead>
-                  <TableHead className="text-right">Unit Price</TableHead>
-                </TableRow>
-              </TableHeader>
-
-              <TableBody>
-                {sidePO.items?.map((item, index) => (
-                  <TableRow key={index}>
-                    <TableCell className="font-medium">
-                      {item["ITEM DESCRIPTION"]}
-                    </TableCell>
-                    <TableCell>{item.QTY}</TableCell>
-                    <TableCell>{item.UOM}</TableCell>
-                    <TableCell className="text-right">
-                      ₱ {(item["UNIT PRICE"] * item.QTY).toFixed(2)}
-                    </TableCell>
-                  </TableRow>
-                ))}
-
-                {/* TOTAL ROW */}
-                <TableRow className="font-semibold border-t">
-                  <TableCell colSpan={3} className="text-right">
-                    Total
-                  </TableCell>
-                  <TableCell className="text-right">
-                    ₱{" "}
-                    {sidePO.items
-                      ?.reduce(
-                        (sum, item) => sum + item.QTY * item["UNIT PRICE"],
-                        0
-                      )
-                      .toFixed(2)}
-                  </TableCell>
-                </TableRow>
-              </TableBody>
-            </Table>
           </div>
-        </div>
-      ) : (
-        <p className="text-sm text-gray-500">Select a PO to see details</p>
-      )}
-    </aside>
+        ) : (
+          <p className="text-sm text-gray-500">Select a PO to see details</p>
+        )}
+      </CardContent>
+    </Card>
   );
 }
