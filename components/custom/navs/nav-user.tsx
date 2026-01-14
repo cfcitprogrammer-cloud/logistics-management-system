@@ -65,7 +65,6 @@ export function NavUser() {
   async function logOut() {
     try {
       await signOut(auth);
-      router.push("/login");
     } catch (error) {
       alert("Something went wrong");
     }

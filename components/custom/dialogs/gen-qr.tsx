@@ -8,6 +8,9 @@ import {
   DialogTitle,
   DialogClose,
 } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { copyToClipboard } from "@/lib/clipboard";
+import { Copy } from "lucide-react";
 
 // Props
 interface DispatchDeliveryQRDialogProps {
@@ -39,6 +42,13 @@ export default function DispatchDeliveryQRDialog({
         <div className="text-sm text-center space-y-1 mb-4">
           <p>
             <strong>Tracking ID:</strong> {trackingId}
+            <Button
+              variant={"ghost"}
+              size={"sm"}
+              onClick={() => copyToClipboard(trackingId || "")}
+            >
+              <Copy />
+            </Button>
           </p>
         </div>
 

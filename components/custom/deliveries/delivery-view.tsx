@@ -24,8 +24,14 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Ellipsis } from "lucide-react";
+import { getDeliveryStatus } from "@/lib/delivery";
+import { Copy, Ellipsis, MapPin } from "lucide-react";
 import DispatchDeliveryQRDialog from "@/components/custom/dialogs/gen-qr"; // ShadCN dialog
+import { Button } from "@/components/ui/button";
+import { copyToClipboard } from "@/lib/clipboard";
+import axios from "axios";
+import { toast } from "sonner";
+import { Spinner } from "@/components/ui/spinner";
 
 // Tailwind Ping Dot as a Leaflet DivIcon
 const createPingMarker = () => {
@@ -37,6 +43,21 @@ const createPingMarker = () => {
            </div>`,
     iconSize: [20, 20],
     iconAnchor: [10, 10], // center the dot
+  });
+};
+
+const createLucidePingMarker = () => {
+  return L.divIcon({
+    className: "lucide-ping-marker",
+    html: `
+      <div class="relative flex justify-center items-center">
+        <span class="relative inline-flex h-6 w-6">
+          <${MapPin} class="text-red-600" size={24} />
+        </span>
+      </div>
+    `,
+    iconSize: [30, 30], // Adjust size of the marker
+    iconAnchor: [15, 30], // Anchor the icon properly (adjust position if needed)
   });
 };
 
@@ -57,6 +78,7 @@ export default function DeliveryViewCard({
   selectedDelivery,
 }: DeliveryViewCardProps) {
   const [isQRDialogOpen, setIsQRDialogOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   if (!selectedDelivery) return null;
 
@@ -64,14 +86,57 @@ export default function DeliveryViewCard({
   const lng = selectedDelivery.LONG || 120.9842;
   const position: [number, number] = [lat, lng];
 
+  async function updateStatus(status: string) {
+    setLoading(true);
+
+    try {
+      const res = await axios.post(
+        process.env.NEXT_PUBLIC_GAS_LINK || "",
+        JSON.stringify({
+          action: "deliveries",
+          path: "update-status",
+          id: selectedDelivery?.ID,
+          status,
+        })
+      );
+
+      if (res.data?.success) {
+        toast.success(`Marked as ${status.toUpperCase()}`);
+      } else {
+        toast.error("Failed to update status");
+      }
+    } catch (error) {
+      toast.error("Failed to update status");
+    } finally {
+      setLoading(false);
+    }
+  }
+
   return (
     <Card className="md:col-span-1">
+      {loading && (
+        <div className="w-full h-screen fixed top-0 left-0 bg-background z-20 flex items-center justify-center">
+          <Spinner />
+        </div>
+      )}
+
       <CardHeader>
-        <CardTitle>#{selectedDelivery["TRACKING ID"]}</CardTitle>
+        <CardTitle>
+          #{selectedDelivery["TRACKING ID"]}{" "}
+          <Button
+            variant={"ghost"}
+            size={"sm"}
+            onClick={() =>
+              copyToClipboard(selectedDelivery["TRACKING ID"] || "")
+            }
+          >
+            <Copy />
+          </Button>
+        </CardTitle>
         <CardDescription className="space-x-2">
           <Badge>{selectedDelivery.STATUS}</Badge>
           <span className="text-xs text-muted-foreground">
-            {selectedDelivery.COURIER}
+            {getDeliveryStatus(selectedDelivery["DELIVERY DATE"].toString())}
           </span>
         </CardDescription>
 
@@ -86,25 +151,19 @@ export default function DeliveryViewCard({
                 Dispatch Delivery (QR)
               </DropdownMenuItem>
 
-              <DropdownMenuItem onClick={() => console.log("Cancel Delivery")}>
+              <DropdownMenuItem onClick={() => updateStatus("Cancelled")}>
                 Cancel Delivery
               </DropdownMenuItem>
 
-              <DropdownMenuItem
-                onClick={() => console.log("Mark as Delivered")}
-              >
+              <DropdownMenuItem onClick={() => updateStatus("Delivered")}>
                 Mark as Delivered
               </DropdownMenuItem>
 
-              <DropdownMenuItem
-                onClick={() => console.log("Mark as Delivered")}
-              >
+              <DropdownMenuItem onClick={() => updateStatus("In Transit")}>
                 Mark as In Transit
               </DropdownMenuItem>
 
-              <DropdownMenuItem
-                onClick={() => console.log("Mark as Delivered")}
-              >
+              <DropdownMenuItem onClick={() => updateStatus("Returned")}>
                 Mark as Returned
               </DropdownMenuItem>
             </DropdownMenuContent>
@@ -131,11 +190,19 @@ export default function DeliveryViewCard({
                 url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
               />
               <Marker position={position} icon={createPingMarker()}>
-                <Popup>
-                  Delivery Location: {selectedDelivery["DELIVERY ADDRESS"]}
-                </Popup>
+                <Popup>Current Location</Popup>
               </Marker>
               <FlyToMarker position={position} />
+
+              <Marker
+                position={[
+                  selectedDelivery.LATFROM!,
+                  selectedDelivery.LONGFROM!,
+                ]}
+                icon={createPingMarker()}
+              >
+                <Popup>Current Location</Popup>
+              </Marker>
             </MapContainer>
           )}
         </figure>

@@ -8,7 +8,7 @@ export const newDeliverySchema = z.object({
   toLat: z.number(),
   toLng: z.number(),
   deliveryDate: z.string().min(1, "Delivery date is required"),
-  trackingId: z.string().optional(),
+  trackingId: z.string(),
   courier: z.string().min(1, "Courier is required"),
 });
 

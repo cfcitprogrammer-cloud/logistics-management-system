@@ -173,6 +173,9 @@ export default function NewDeliveriesDialog({
           trackingId: "",
           courier: "",
         });
+
+        setFromInput("");
+        setToInput("");
         toast.success("Delivery created successfully!");
         onOpenChange(false);
       } else {
@@ -183,8 +186,27 @@ export default function NewDeliveriesDialog({
     }
   };
 
+  function handleChange(isOpen: boolean) {
+    reset({
+      fromLocation: "",
+      toLocation: "",
+      fromLat: 0,
+      fromLng: 0,
+      toLat: 0,
+      toLng: 0,
+      deliveryDate: "",
+      trackingId: "",
+      courier: "",
+    });
+
+    setFromInput("");
+    setToInput("");
+
+    onOpenChange(isOpen);
+  }
+
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={handleChange}>
       <DialogContent className="sm:max-w-lg">
         <DialogHeader>
           <DialogTitle>New Delivery</DialogTitle>

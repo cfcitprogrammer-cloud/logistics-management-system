@@ -94,7 +94,7 @@ export default function POTable({
 
       setData(response.data?.data || []);
       const total = response.data?.totalPages || 1;
-      setMaxPage(Math.ceil(total / limit));
+      setMaxPage(total);
     } catch (error) {
       console.error("Error fetching PO data:", error);
       setData([]);

@@ -9,16 +9,6 @@ export const warehouseColumns: ColumnDef<Delivery>[] = [
     cell: (info) => info.getValue(),
   },
   {
-    accessorKey: "LAST LOCATION",
-    header: "Last Location",
-    cell: (info) => info.getValue(),
-  },
-  {
-    accessorKey: "DELIVERY ADDRESS",
-    header: "Delivery Address",
-    cell: (info) => shortenAddress(info.getValue() as string),
-  },
-  {
     accessorKey: "STATUS",
     header: "Status",
     cell: (info) => info.getValue(),

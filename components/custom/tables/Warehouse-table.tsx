@@ -92,7 +92,7 @@ export default function WarehouseTable({
       setData(response.data?.data || []);
       console.log(response.data);
       const total = response.data?.totalPages || 1;
-      setMaxPage(Math.ceil(total / limit));
+      setMaxPage(total);
     } catch (error) {
       console.error("Error fetching warehouse stock:", error);
       setData([]);

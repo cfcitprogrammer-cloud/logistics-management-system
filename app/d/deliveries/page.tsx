@@ -26,6 +26,7 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import NewDeliveriesDialog from "@/components/custom/dialogs/new-deliveries-dialog";
 import DeliveryViewCard from "@/components/custom/deliveries/delivery-view";
+import PODialog from "@/components/custom/dialogs/po-dialog";
 
 export default function DeliveriesPage() {
   const [selectedDelivery, setSelectedDelivery] = useState<Delivery | null>(
@@ -34,11 +35,17 @@ export default function DeliveriesPage() {
 
   // 👉 NEW STATE
   const [isNewDeliveryOpen, setIsNewDeliveryOpen] = useState(false);
+  const [isPoOpen, setPoOpen] = useState(false);
   const [prepPO, setPrepPO] = useState<PO | null>(null);
 
   const handlePrepForDelivery = (po: PO) => {
     setPrepPO(po);
     setIsNewDeliveryOpen(true);
+  };
+
+  const handleViewDetails = (po: PO) => {
+    setPrepPO(po);
+    setPoOpen(true);
   };
 
   useEffect(() => {
@@ -93,7 +100,7 @@ export default function DeliveriesPage() {
                 </DropdownMenuTrigger>
 
                 <DropdownMenuContent align="end" className="w-40">
-                  <DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => handleViewDetails(row)}>
                     <Info />
                     View Details
                   </DropdownMenuItem>
@@ -151,6 +158,8 @@ export default function DeliveriesPage() {
         onOpenChange={setIsNewDeliveryOpen}
         po={prepPO}
       />
+
+      <PODialog currentPO={prepPO} open={isPoOpen} onOpenChange={setPoOpen} />
     </section>
   );
 }
