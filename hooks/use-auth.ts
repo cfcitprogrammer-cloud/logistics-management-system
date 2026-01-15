@@ -36,12 +36,12 @@ export function useAuthGuard(): AuthGuardResult {
           const idTokenResult = await getIdTokenResult(firebaseUser, true);
           const userRole = idTokenResult.claims.role as string | undefined;
 
-          if (!userRole) router.replace("/a/login"); // redirect if not logged in
+          if (!userRole) router.replace("/a/verify"); // redirect if not logged in
           setRole(userRole || null);
         } catch (error) {
           console.error("Error fetching user role:", error);
           setRole(null);
-          router.replace("/a/login"); // redirect if not logged in
+          router.replace("/a/verify"); // redirect if not logged in
         }
 
         setLoading(false);
