@@ -1,13 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   ColumnDef,
   flexRender,
   getCoreRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-
 import {
   Table,
   TableBody,
@@ -16,31 +15,41 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { ButtonGroup } from "@/components/ui/button-group";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { PO } from "@/db/types/po";
+import axios from "axios";
+import { POEmpty } from "../po/empty-po";
 
-interface DataTableProps<TData, TValue> {
-  columns: ColumnDef<TData, TValue>[];
-  data: TData[];
-  onSelect?: (row: TData | null) => void;
-  renderActions?: (row: TData) => React.ReactNode;
+interface POTableProps {
+  columns: ColumnDef<PO, any>[];
+  renderActions?: (row: PO) => React.ReactNode;
+  onSelect?: (row: PO | null) => void;
+  pageSize?: number;
 }
 
-export function POTable<TData, TValue>({
+export default function POTable({
   columns,
-  data,
-  onSelect,
   renderActions,
-}: DataTableProps<TData, TValue>) {
+  onSelect,
+  pageSize = 10,
+}: POTableProps) {
+  const [data, setData] = useState<PO[]>([]);
   const [rowSelection, setRowSelection] = useState<Record<string, boolean>>({});
+  const [currentPage, setCurrentPage] = useState(1);
+  const [maxPage, setMaxPage] = useState(1);
+  const [loading, setLoading] = useState(false);
 
-  const actionColumn: ColumnDef<TData> | null = renderActions
+  const [searchInput, setSearchInput] = useState(""); // what user types
+  const [searchTerm, setSearchTerm] = useState(""); // what we actually search
+
+  const actionColumn: ColumnDef<PO> | null = renderActions
     ? {
         id: "actions",
         header: "Actions",
         cell: ({ row }) => (
-          <div
-            className="flex gap-2"
-            onClick={(e) => e.stopPropagation()} // prevent row selection
-          >
+          <div className="flex gap-2" onClick={(e) => e.stopPropagation()}>
             {renderActions(row.original)}
           </div>
         ),
@@ -51,13 +60,10 @@ export function POTable<TData, TValue>({
     data,
     columns: actionColumn ? [...columns, actionColumn] : columns,
     getCoreRowModel: getCoreRowModel(),
-    state: {
-      rowSelection,
-    },
+    state: { rowSelection },
     onRowSelectionChange: (newSelection) => {
       const lastSelectedId = Object.keys(newSelection).pop();
       const singleSelection = lastSelectedId ? { [lastSelectedId]: true } : {};
-
       setRowSelection(singleSelection);
 
       if (onSelect) {
@@ -67,11 +73,75 @@ export function POTable<TData, TValue>({
         onSelect(selectedRow ?? null);
       }
     },
-    getRowId: (row) => (row as any).ID?.toString() ?? "",
+    getRowId: (row) => row.ID?.toString() ?? "",
   });
+
+  async function fetchPOs(page = 1, limit = 10, search = "") {
+    setLoading(true);
+    try {
+      const url = process.env.NEXT_PUBLIC_GAS_LINK || "";
+      const response = await axios.get(url, {
+        params: {
+          action: "purchase-order",
+          path: "get-all-po",
+          page,
+          limit,
+          search,
+        },
+      });
+
+      console.log(response.data);
+
+      setData(response.data?.data || []);
+      const total = response.data?.totalPages || 1;
+      setMaxPage(total);
+    } catch (error) {
+      console.error("Error fetching PO data:", error);
+      setData([]);
+      setMaxPage(1);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  // Fetch when page, pageSize, or searchTerm changes
+  useEffect(() => {
+    fetchPOs(currentPage, pageSize, searchTerm);
+  }, [currentPage, pageSize, searchTerm]);
+
+  // Reset table when search input is cleared
+  useEffect(() => {
+    if (searchInput === "") {
+      setCurrentPage(1);
+      setSearchTerm("");
+    }
+  }, [searchInput]);
+
+  // Trigger fetch on search button or Enter
+  const handleSearch = () => {
+    setCurrentPage(1); // reset page
+    setSearchTerm(searchInput);
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter") handleSearch();
+  };
 
   return (
     <div className="overflow-hidden rounded-md border">
+      {/* Search input */}
+      <div className="p-2 flex gap-2">
+        <Input
+          placeholder="Search POs..."
+          value={searchInput}
+          onChange={(e) => setSearchInput(e.target.value)}
+          onKeyDown={handleKeyDown}
+        />
+        <Button onClick={handleSearch} disabled={loading}>
+          Search
+        </Button>
+      </div>
+
       <Table>
         <TableHeader>
           {table.getHeaderGroups().map((headerGroup) => (
@@ -91,7 +161,16 @@ export function POTable<TData, TValue>({
         </TableHeader>
 
         <TableBody>
-          {table.getRowModel().rows.length ? (
+          {loading ? (
+            <TableRow>
+              <TableCell
+                colSpan={columns.length + (actionColumn ? 1 : 0)}
+                className="h-24 text-center"
+              >
+                Loading...
+              </TableCell>
+            </TableRow>
+          ) : table.getRowModel().rows.length ? (
             table.getRowModel().rows.map((row) => (
               <TableRow
                 key={row.id}
@@ -101,7 +180,7 @@ export function POTable<TData, TValue>({
                   const isSelected = rowSelection[row.id];
                   const newSelection = isSelected ? {} : { [row.id]: true };
                   setRowSelection(newSelection);
-                  onSelect?.(isSelected ? null : row.original);
+                  if (onSelect) onSelect(isSelected ? null : row.original);
                 }}
               >
                 {row.getVisibleCells().map((cell) => (
@@ -117,12 +196,38 @@ export function POTable<TData, TValue>({
                 colSpan={columns.length + (actionColumn ? 1 : 0)}
                 className="h-24 text-center"
               >
-                No results.
+                <POEmpty />
               </TableCell>
             </TableRow>
           )}
         </TableBody>
       </Table>
+
+      {/* Pagination */}
+      <div className="p-2 flex justify-between items-center">
+        <div>
+          <p>
+            Page {currentPage} of {maxPage}
+          </p>
+        </div>
+
+        <div>
+          <ButtonGroup>
+            <Button
+              onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
+              disabled={currentPage === 1 || loading}
+            >
+              Prev
+            </Button>
+            <Button
+              onClick={() => setCurrentPage((p) => Math.min(p + 1, maxPage))}
+              disabled={currentPage === maxPage || loading}
+            >
+              Next
+            </Button>
+          </ButtonGroup>
+        </div>
+      </div>
     </div>
   );
 }

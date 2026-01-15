@@ -21,8 +21,10 @@ type FormData = z.infer<typeof purchaseOrderSchema>;
 
 export default function ItemDataList({
   form,
+  loading,
 }: {
   form: UseFormReturn<FormData>;
+  loading: boolean;
 }) {
   const [materialNumber, setMaterialNumber] = useState("");
   const [itemDescription, setItemDescription] = useState("");
@@ -153,6 +155,7 @@ export default function ItemDataList({
           type="button"
           className="w-full"
           onClick={editingIndex !== null ? saveItem : addItem}
+          disabled={loading}
         >
           {editingIndex !== null ? "Update Item" : "Add Item"}
         </Button>
@@ -184,6 +187,7 @@ export default function ItemDataList({
                     size={"sm"}
                     type="button"
                     onClick={() => editItem(index)}
+                    disabled={loading}
                   >
                     <Pencil />
                   </Button>
@@ -191,6 +195,7 @@ export default function ItemDataList({
                     size={"sm"}
                     type="button"
                     onClick={() => deleteItem(index)}
+                    disabled={loading}
                   >
                     <Trash2 />
                   </Button>

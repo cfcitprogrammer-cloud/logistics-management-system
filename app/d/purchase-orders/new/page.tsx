@@ -2,22 +2,36 @@
 
 import * as z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useEffect, useState } from "react";
+import { useForm, Controller } from "react-hook-form";
 
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
-import { Controller, useForm } from "react-hook-form";
-import { purchaseOrderSchema } from "@/db/schema/purchase-order";
 import { Field, FieldError, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import ItemDataList from "@/components/custom/po/item-data-list";
-import { useEffect, useState } from "react";
-import { filetobase64 } from "@/lib/file-converter";
 import { Spinner } from "@/components/ui/spinner";
-import { redirect } from "next/navigation";
+import ItemDataList from "@/components/custom/po/item-data-list";
+import { filetobase64 } from "@/lib/file-converter";
+
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+
+import { purchaseOrderSchema } from "@/db/schema/purchase-order";
 
 export default function NewPurchaseOrderPage() {
   const [loading, setLoading] = useState(false);
+  const [successDialogOpen, setSuccessDialogOpen] = useState(false);
+  const [errorDialogOpen, setErrorDialogOpen] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
+
   const form = useForm<z.infer<typeof purchaseOrderSchema>>({
     resolver: zodResolver(purchaseOrderSchema),
     defaultValues: {
@@ -29,7 +43,7 @@ export default function NewPurchaseOrderPage() {
       deliveryAddress: "",
       itemData: [],
       remarks: "",
-      file: null, // will store { name, type, content } object
+      file: null,
     },
   });
 
@@ -37,9 +51,6 @@ export default function NewPurchaseOrderPage() {
     setLoading(true);
 
     try {
-      console.log("Form data ready for submission:", data);
-
-      // Example: sending to Google Apps Script endpoint
       const res = await fetch(process.env.NEXT_PUBLIC_GAS_LINK || "", {
         method: "POST",
         headers: { "Content-Type": "text/plain" },
@@ -50,16 +61,22 @@ export default function NewPurchaseOrderPage() {
         }),
       });
 
-      const result = await res.json();
+      if (!res.ok) {
+        const errText = await res.text();
+        throw new Error(errText || "Server error");
+      }
 
-      alert("Purchase Order Submitted");
+      const result = await res.json();
+      console.log("Form submitted successfully:", result);
+
+      setSuccessDialogOpen(true);
       form.reset();
-    } catch (err) {
+    } catch (err: any) {
       console.error("Form submission failed:", err);
-      alert("Something went wrong. PO not submitted.");
+      setErrorMessage(err.message || "Something went wrong. PO not submitted.");
+      setErrorDialogOpen(true);
     } finally {
       setLoading(false);
-      form.reset();
     }
   }
 
@@ -71,6 +88,7 @@ export default function NewPurchaseOrderPage() {
     <section>
       <form onSubmit={form.handleSubmit(onSubmit)}>
         <div className="grid grid-cols-3 gap-4">
+          {/* Form Card */}
           <Card className="col-span-1">
             <CardContent>
               <h1 className="font-semibold">Main Information</h1>
@@ -107,8 +125,8 @@ export default function NewPurchaseOrderPage() {
                       <Input
                         {...field}
                         id={field.name}
-                        aria-invalid={fieldState.invalid}
                         type="date"
+                        aria-invalid={fieldState.invalid}
                         className="bg-slate-100"
                       />
                       {fieldState.invalid && (
@@ -186,18 +204,14 @@ export default function NewPurchaseOrderPage() {
                       </FieldLabel>
                       <Input
                         type="file"
-                        accept=".doc, .docx, .pdf"
+                        accept=".doc,.docx,.pdf"
                         id={field.name}
                         className="bg-slate-100"
                         onChange={async (e) => {
                           const file = e.target.files?.[0];
                           if (!file) return;
-
                           try {
-                            // Convert to Base64 (raw, without prefix)
                             const base64 = await filetobase64(file);
-
-                            // Save file object to form state
                             field.onChange({
                               name: file.name,
                               type: file.type,
@@ -308,10 +322,39 @@ export default function NewPurchaseOrderPage() {
 
           {/* Item List */}
           <div className="col-span-2">
-            <ItemDataList form={form} />
+            <ItemDataList form={form} loading={loading} />
           </div>
         </div>
       </form>
+
+      {/* Success Dialog */}
+      <Dialog open={successDialogOpen} onOpenChange={setSuccessDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Purchase Order Created</DialogTitle>
+            <DialogDescription>
+              Your order has been successfully created. You can view it in your
+              dashboard.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button onClick={() => setSuccessDialogOpen(false)}>Close</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Error Dialog */}
+      <Dialog open={errorDialogOpen} onOpenChange={setErrorDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Submission Failed</DialogTitle>
+            <DialogDescription>{errorMessage}</DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button onClick={() => setErrorDialogOpen(false)}>Close</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </section>
   );
 }

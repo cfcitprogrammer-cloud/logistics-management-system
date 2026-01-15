@@ -20,9 +20,19 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Table,
+  TableBody,
+  TableCaption,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { PO } from "@/db/types/po";
+import { Ellipsis, Plus, Trash } from "lucide-react";
 
 type ShipmentFormData = {
-  poId: number;
   fleetId: string;
   driverId: string;
   from: string;
@@ -31,7 +41,7 @@ type ShipmentFormData = {
   actualDelivery: string;
   currentLocation: string;
   remarks: string;
-  status: "Pending" | "In Transit" | "Delivered" | "Out for Delivery";
+  pos: PO[];
 };
 
 type Driver = { ID: string; NAME: string };
@@ -39,7 +49,6 @@ type Fleet = { ID: string; "PLATE NUMBER": string; MODEL: string };
 
 export default function ShipmentForm() {
   const [form, setForm] = useState<ShipmentFormData>({
-    poId: 0,
     fleetId: "",
     driverId: "",
     from: "",
@@ -48,15 +57,57 @@ export default function ShipmentForm() {
     actualDelivery: "",
     currentLocation: "",
     remarks: "",
-    status: "Pending",
+    pos: [],
   });
 
   const [drivers, setDrivers] = useState<Driver[]>([]);
   const [fleets, setFleets] = useState<Fleet[]>([]);
+  const [pos, setPO] = useState<PO[]>([]);
 
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState("");
+
+  function addToList(po: PO) {
+    setForm((prev) => {
+      const exists = prev.pos.some((p) => po["ID"] === po["ID"]);
+
+      // if (exists) return prev; // no change
+
+      return {
+        ...prev,
+        pos: [...prev.pos, po],
+      };
+    });
+  }
+
+  function removeFromList(id: PO["ID"]) {
+    setForm((prev) => ({
+      ...prev,
+      pos: prev.pos.filter((po) => po["ID"] !== id),
+    }));
+  }
+
+  async function getAllPO(page = 1, limit = 10) {
+    try {
+      const url = process.env.NEXT_PUBLIC_GAS_LINK || "";
+
+      const response = await axios.get(url, {
+        params: {
+          action: "purchase-order",
+          path: "get-all-po",
+          page,
+          limit,
+        },
+      });
+
+      console.log(response.data);
+
+      setPO(response.data?.data || []);
+    } catch (error) {
+    } finally {
+    }
+  }
 
   // Fetch drivers and fleets from GAS
   useEffect(() => {
@@ -94,6 +145,7 @@ export default function ShipmentForm() {
       }
     }
 
+    getAllPO();
     fetchDrivers();
     fetchFleets();
   }, []);
@@ -123,10 +175,15 @@ export default function ShipmentForm() {
         })
       );
 
+      console.log({
+        action: "shipment",
+        path: "create-shipment",
+        ...form,
+      });
+
       if (res.data?.success) {
         setSuccess(true);
         setForm({
-          poId: 0,
           fleetId: "",
           driverId: "",
           from: "",
@@ -135,12 +192,14 @@ export default function ShipmentForm() {
           actualDelivery: "",
           currentLocation: "",
           remarks: "",
-          status: "Pending",
+          pos: [],
         });
       } else {
+        console.log(res);
         setError(res.data?.message || "Unknown error");
       }
     } catch (err: any) {
+      console.log(err);
       setError(err.message || "Request failed");
     } finally {
       setLoading(false);
@@ -148,166 +207,223 @@ export default function ShipmentForm() {
   };
 
   return (
-    <Card className="max-w-3xl mx-auto">
-      <CardHeader>
-        <CardTitle>Create New Shipment</CardTitle>
-      </CardHeader>
+    <div className="grid grid-cols-3 gap-2">
+      <Card className="col-span-1">
+        <CardHeader>
+          <CardTitle>Create New Shipment</CardTitle>
+        </CardHeader>
 
-      <CardContent>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <CardContent>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <Label>Fleet</Label>
+                <Select
+                  value={form.fleetId.toString()}
+                  onValueChange={(val) =>
+                    setForm((prev) => ({ ...prev, fleetId: val.toString() }))
+                  }
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Select Fleet" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {fleets.map((fleet) => (
+                      <SelectItem key={fleet.ID} value={String(fleet.ID)}>
+                        {fleet.MODEL} ({fleet.ID})
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div>
+                <Label>Driver</Label>
+                <Select
+                  value={form.driverId}
+                  onValueChange={(val) =>
+                    setForm((prev) => ({ ...prev, driverId: val }))
+                  }
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Select a driver" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {drivers.map((driver) => (
+                      <SelectItem key={driver.ID} value={driver.ID}>
+                        {driver.NAME} ({driver.ID})
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div>
+                <Label>From</Label>
+                <Input
+                  type="text"
+                  name="from"
+                  value={form.from}
+                  onChange={handleChange}
+                  required
+                />
+              </div>
+
+              <div>
+                <Label>To</Label>
+                <Input
+                  type="text"
+                  name="to"
+                  value={form.to}
+                  onChange={handleChange}
+                  required
+                />
+              </div>
+
+              <div>
+                <Label>Expected Delivery</Label>
+                <Input
+                  type="date"
+                  name="expectedDelivery"
+                  value={form.expectedDelivery}
+                  onChange={handleChange}
+                  required
+                />
+              </div>
+
+              <div>
+                <Label>Actual Delivery</Label>
+                <Input
+                  type="date"
+                  name="actualDelivery"
+                  value={form.actualDelivery}
+                  onChange={handleChange}
+                />
+              </div>
+
+              <div>
+                <Label>Current Location</Label>
+                <Input
+                  type="text"
+                  name="currentLocation"
+                  value={form.currentLocation}
+                  onChange={handleChange}
+                />
+              </div>
+            </div>
+
             <div>
-              <Label>PO ID</Label>
-              <Input
-                type="text"
-                name="poId"
-                value={form.poId}
+              <Label>Remarks</Label>
+              <Textarea
+                name="remarks"
+                value={form.remarks}
                 onChange={handleChange}
-                required
               />
             </div>
 
-            <div>
-              <Label>Fleet</Label>
-              <Select
-                value={form.fleetId.toString()}
-                onValueChange={(val) =>
-                  setForm((prev) => ({ ...prev, fleetId: val.toString() }))
-                }
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select Fleet" />
-                </SelectTrigger>
-                <SelectContent>
-                  {fleets.map((fleet) => (
-                    <SelectItem key={fleet.ID} value={String(fleet.ID)}>
-                      {fleet.MODEL} ({fleet.ID})
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+            <CardFooter className="flex flex-col sm:flex-row justify-between items-center gap-2">
+              <Button type="submit" disabled={loading}>
+                {loading ? "Submitting..." : "Create Shipment"}
+              </Button>
+              {success && (
+                <p className="text-green-600">Shipment created successfully!</p>
+              )}
+              {error && <p className="text-red-600">{error}</p>}
+            </CardFooter>
+          </form>
+        </CardContent>
+      </Card>
 
-            <div>
-              <Label>Driver</Label>
-              <Select
-                value={form.driverId}
-                onValueChange={(val) =>
-                  setForm((prev) => ({ ...prev, driverId: val }))
-                }
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select a driver" />
-                </SelectTrigger>
-                <SelectContent>
-                  {drivers.map((driver) => (
-                    <SelectItem key={driver.ID} value={driver.ID}>
-                      {driver.NAME} ({driver.ID})
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+      <Card className="col-span-2">
+        <CardHeader>
+          <CardTitle>Included PO</CardTitle>
+        </CardHeader>
 
-            <div>
-              <Label>From</Label>
-              <Input
-                type="text"
-                name="from"
-                value={form.from}
-                onChange={handleChange}
-                required
-              />
-            </div>
+        <CardContent>
+          {/* included po list */}
+          <Table>
+            <TableCaption>A list of your recent PO.</TableCaption>
+            <TableHeader>
+              <TableRow>
+                <TableHead className="w-[100px]">ID</TableHead>
+                <TableHead>PO NUMBER</TableHead>
+                <TableHead>ISSUE DATE</TableHead>
+                <TableHead>CREATED AT</TableHead>
+                <TableHead></TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {form.pos.map((po, index) => (
+                <TableRow key={index}>
+                  <TableCell className="font-medium">{po.ID}</TableCell>
+                  <TableCell>{po["PO NUMBER"]}</TableCell>
+                  <TableCell>
+                    {new Date(po["ISSUE DATE"]).toLocaleDateString("en-US", {
+                      year: "numeric",
+                      month: "long",
+                      day: "numeric",
+                    })}
+                  </TableCell>
+                  <TableCell>
+                    {new Date(po["CREATED AT"]).toLocaleDateString("en-US", {
+                      year: "numeric",
+                      month: "long",
+                      day: "numeric",
+                    })}
+                  </TableCell>
+                  <TableCell>
+                    <Button onClick={(e) => removeFromList(po.ID)}>
+                      <Trash />
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
 
-            <div>
-              <Label>To</Label>
-              <Input
-                type="text"
-                name="to"
-                value={form.to}
-                onChange={handleChange}
-                required
-              />
-            </div>
-
-            <div>
-              <Label>Expected Delivery</Label>
-              <Input
-                type="date"
-                name="expectedDelivery"
-                value={form.expectedDelivery}
-                onChange={handleChange}
-                required
-              />
-            </div>
-
-            <div>
-              <Label>Actual Delivery</Label>
-              <Input
-                type="date"
-                name="actualDelivery"
-                value={form.actualDelivery}
-                onChange={handleChange}
-              />
-            </div>
-
-            <div>
-              <Label>Current Location</Label>
-              <Input
-                type="text"
-                name="currentLocation"
-                value={form.currentLocation}
-                onChange={handleChange}
-              />
-            </div>
-          </div>
-
-          <div>
-            <Label>Remarks</Label>
-            <Textarea
-              name="remarks"
-              value={form.remarks}
-              onChange={handleChange}
-            />
-          </div>
-
-          <div>
-            <Label>Status</Label>
-            <Select
-              value={form.status}
-              onValueChange={(val) =>
-                setForm((prev) => ({
-                  ...prev,
-                  status: val as ShipmentFormData["status"],
-                }))
-              }
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Select status" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="Pending">Pending</SelectItem>
-                <SelectItem value="In Transit">In Transit</SelectItem>
-                <SelectItem value="Delivered">Delivered</SelectItem>
-                <SelectItem value="Out for Delivery">
-                  Out for Delivery
-                </SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          <CardFooter className="flex flex-col sm:flex-row justify-between items-center gap-2">
-            <Button type="submit" disabled={loading}>
-              {loading ? "Submitting..." : "Create Shipment"}
-            </Button>
-            {success && (
-              <p className="text-green-600">Shipment created successfully!</p>
-            )}
-            {error && <p className="text-red-600">{error}</p>}
-          </CardFooter>
-        </form>
-      </CardContent>
-    </Card>
+          {/* po list */}
+          <h2>List</h2>
+          <Table>
+            <TableCaption>A list of your recent PO.</TableCaption>
+            <TableHeader>
+              <TableRow>
+                <TableHead className="w-[100px]">ID</TableHead>
+                <TableHead>PO NUMBER</TableHead>
+                <TableHead>ISSUE DATE</TableHead>
+                <TableHead>CREATED AT</TableHead>
+                <TableHead></TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {pos.map((po, index) => (
+                <TableRow key={index}>
+                  <TableCell className="font-medium">{po.ID}</TableCell>
+                  <TableCell>{po["PO NUMBER"]}</TableCell>
+                  <TableCell>
+                    {new Date(po["ISSUE DATE"]).toLocaleDateString("en-US", {
+                      year: "numeric",
+                      month: "long",
+                      day: "numeric",
+                    })}
+                  </TableCell>
+                  <TableCell>
+                    {new Date(po["CREATED AT"]).toLocaleDateString("en-US", {
+                      year: "numeric",
+                      month: "long",
+                      day: "numeric",
+                    })}
+                  </TableCell>
+                  <TableCell>
+                    <Button onClick={() => addToList(po)}>
+                      <Plus />
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </CardContent>
+      </Card>
+    </div>
   );
 }

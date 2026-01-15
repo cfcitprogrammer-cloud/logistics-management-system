@@ -1,12 +1,21 @@
+"use client";
+
 import { AppSidebar } from "@/components/custom/app-sidebar";
 import { AppSidebarHeader } from "@/components/custom/app-sidebar-header";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
+import { useAuthGuard } from "@/hooks/use-auth";
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 
 export default function DashboardLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const { loading } = useAuthGuard();
+
+  if (loading) return null;
+
   return (
     <SidebarProvider
       style={

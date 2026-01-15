@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono, Nunito_Sans, DM_Sans } from "next/font/google";
 import "./globals.css";
+import "leaflet/dist/leaflet.css";
+import { Toaster } from "@/components/ui/sonner";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -34,7 +36,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${dmSans.variable} antialiased`}>{children}</body>
+      <body className={`${dmSans.variable} antialiased dark`}>
+        {children} <Toaster />
+      </body>
     </html>
   );
 }

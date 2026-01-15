@@ -11,6 +11,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { Ellipsis } from "lucide-react";
 
 interface Fleet {
   ID: number;
@@ -78,8 +79,8 @@ export default function AllFleetsCard() {
                 <TableHead>Model</TableHead>
                 <TableHead>Load Capacity</TableHead>
                 <TableHead>Status</TableHead>
-                <TableHead>Location</TableHead>
                 <TableHead>Driver</TableHead>
+                <TableHead>Action</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -90,8 +91,10 @@ export default function AllFleetsCard() {
                   <TableCell>{fleet.MODEL}</TableCell>
                   <TableCell>{fleet["LOAD CAPACITY"]}</TableCell>
                   <TableCell>{fleet.STATUS}</TableCell>
-                  <TableCell>{fleet["CURRENT LOCATION"]}</TableCell>
                   <TableCell>{fleet["CURRENT DRIVER"]}</TableCell>
+                  <TableCell>
+                    <Ellipsis />
+                  </TableCell>
                 </TableRow>
               ))}
             </TableBody>

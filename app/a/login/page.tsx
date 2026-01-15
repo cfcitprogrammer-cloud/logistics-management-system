@@ -12,6 +12,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Field, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Spinner } from "@/components/ui/spinner";
 import { auth } from "@/lib/firebase";
 import { fi } from "date-fns/locale";
 import {
@@ -21,9 +22,11 @@ import {
   signInWithEmailAndPassword,
 } from "firebase/auth";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 export default function LoginPage() {
+  const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [email, setEmail] = useState("");
@@ -45,12 +48,20 @@ export default function LoginPage() {
       const user = await signInWithEmailAndPassword(auth, email, password);
 
       if (user) {
-        console.log("User logged in:", user);
+        router.replace("/d/dashboard");
       } else {
         setError("Invalid email or password");
       }
     } catch (error: any) {
-      setError(error.message || "An error occurred during login");
+      if (error.code === "auth/user-not-found") {
+        setError("No user found with that email.");
+      } else if (error.code === "auth/wrong-password") {
+        setError("Incorrect password.");
+      } else if (error.code === "auth/invalid-email") {
+        setError("The email address is not valid.");
+      } else {
+        setError("An error occurred during login.");
+      }
     } finally {
       setLoading(false);
     }
@@ -67,6 +78,8 @@ export default function LoginPage() {
         </CardHeader>
 
         <CardContent>
+          <p className="text-red-500 mb-2">{error}</p>
+
           <form className="space-y-4" onSubmit={onSubmit}>
             <Field>
               <FieldLabel htmlFor="email">Email Address</FieldLabel>
@@ -75,6 +88,7 @@ export default function LoginPage() {
                 id="email"
                 autoComplete="off"
                 placeholder="m@example.com"
+                onChange={(e) => setEmail(e.target.value)}
               />
             </Field>
 
@@ -83,25 +97,38 @@ export default function LoginPage() {
               <Input
                 className="bg-slate-100"
                 id="password"
+                type="password"
                 autoComplete="off"
                 placeholder="******"
+                onChange={(e) => setPassword(e.target.value)}
               />
             </Field>
 
-            <div className="flex justify-between gap-2">
-              <div className="flex items-center space-x-2">
-                <Checkbox id="remember-me" />
+            <div className="flex justify-between items-center gap-2">
+              <div className="flex flex-col md:flex-row md:items-center">
+                <Input
+                  id="remember-me"
+                  type="checkbox"
+                  checked={rememberMe}
+                  onChange={(e) => setRememberMe(e.target.checked)}
+                  className="h-6"
+                />
                 <Label className="text-xs text-gray-500" htmlFor="remember-me">
                   Remember Me
                 </Label>
               </div>
 
-              <Link className="text-primary text-xs" href={"#"}>
+              <Link
+                className="text-primary text-xs"
+                href={"/a/forgot-password"}
+              >
                 Forgot Password
               </Link>
             </div>
 
-            <Button className="w-full">Login</Button>
+            <Button className="w-full">
+              {loading ? <Spinner /> : "Login"}
+            </Button>
 
             <p className="text-xs text-center">
               Don't have an account?{" "}
