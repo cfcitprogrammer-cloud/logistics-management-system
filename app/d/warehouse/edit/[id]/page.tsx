@@ -16,6 +16,7 @@ import { Spinner } from "@/components/ui/spinner";
 import { warehouseStockSchema } from "@/db/schema/warehouse-stock";
 import { WarehouseStock } from "@/db/types/warehouse";
 import axios from "axios";
+import { toast } from "sonner";
 
 export default function UpdateWarehouseStockPage() {
   const { id } = useParams<{ id: string }>();
@@ -88,11 +89,22 @@ export default function UpdateWarehouseStockPage() {
         }),
       });
 
-      alert("Stock updated successfully");
-      router.push("/warehouse");
+      toast.success("Stock updated successfully");
+      form.reset({
+        itemId: "",
+        itemName: "",
+        category: "",
+        uom: "",
+        currentStock: 0,
+        reservedStock: 0,
+        minStockLevel: 0,
+        maxStockLevel: 0,
+        remarks: "", // Reset remarks field
+      });
+      // router.push("/warehouse");
     } catch (err) {
       console.error("Update failed:", err);
-      alert("Update failed");
+      toast.error("Update failed");
     } finally {
       setLoading(false);
     }

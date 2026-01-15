@@ -28,18 +28,18 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { toast } from "sonner";
+import { Spinner } from "@/components/ui/spinner";
 
 export default function PurchaseOrdersPage() {
   const [selectedPO, setSelectedPO] = useState<PO | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [refreshKey, setRefreshKey] = useState(0);
 
   /** Update status for Accounting or Warehouse */
   async function setStatus(dept: string, status: string, id: number) {
-    console.log({
-      action: "purchase-order",
-      path: dept,
-      status,
-      id,
-    });
+    setLoading(true);
+
     try {
       const url = process.env.NEXT_PUBLIC_GAS_LINK || "";
       const res = await axios.post(
@@ -56,13 +56,50 @@ export default function PurchaseOrdersPage() {
 
       // Optionally, refresh the selected PO by keeping the current selection
       setSelectedPO((prev) => (prev && prev.ID === id ? { ...prev } : prev));
+      setRefreshKey((prev) => prev + 1);
+
+      toast.success("Status Updated");
     } catch (error) {
-      console.error("Error updating status:", error);
+      toast.error(`Error updating status: ${error}`);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function cancelPO(id: number) {
+    setLoading(true);
+
+    try {
+      const url = process.env.NEXT_PUBLIC_GAS_LINK || "";
+      const res = await axios.post(
+        url,
+        JSON.stringify({
+          action: "purchase-order",
+          path: "cancel",
+          id,
+        })
+      );
+
+      console.log(res);
+      setSelectedPO((prev) => (prev && prev.ID === id ? { ...prev } : prev));
+      setRefreshKey((prev) => prev + 1);
+
+      toast.success("Status Updated");
+    } catch (error) {
+      toast.error(`Error updating status: ${error}`);
+    } finally {
+      setLoading(false);
     }
   }
 
   return (
     <section>
+      {loading && (
+        <div className="fixed w-screen h-screen top-0 left-0 bg-background flex justify-center items-center z-10">
+          <Spinner />
+        </div>
+      )}
+
       <header className="col-span-full border-0 border-l-4 pl-2 border-l-primary mb-4">
         <h1 className="text-lg font-semibold">Purchase Orders</h1>
         <p className="text-sm">
@@ -95,6 +132,7 @@ export default function PurchaseOrdersPage() {
 
           <CardContent>
             <POTable
+              key={refreshKey}
               columns={columns}
               onSelect={setSelectedPO}
               renderActions={(row) => (
@@ -168,7 +206,7 @@ export default function PurchaseOrdersPage() {
                       </DropdownMenuSubContent>
                     </DropdownMenuSub>
 
-                    <DropdownMenuItem onClick={() => console.log("cancel")}>
+                    <DropdownMenuItem onClick={() => cancelPO(row.ID)}>
                       Cancel PO
                     </DropdownMenuItem>
                   </DropdownMenuContent>

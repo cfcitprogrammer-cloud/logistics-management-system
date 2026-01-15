@@ -1,25 +1,32 @@
-import DashboardStats from "@/components/custom/dashboard/dashboard-stats";
-import ShipmentStats from "@/components/custom/dashboard/shipment-stats";
+"use client";
+
+import { useState } from "react";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { StatusLineChart } from "@/components/custom/charts/status-chart";
+import { TotalBarChart } from "@/components/custom/charts/totals-chart";
+import TodayStats from "@/components/custom/charts/stats";
+
+type Mode = "week" | "year";
 
 export default function DashboardPage() {
   return (
-    <div>
-      <header className="col-span-full border-0 border-l-4 pl-2 border-l-primary mb-4">
-        <h1 className="text-lg font-semibold">Dashboard</h1>
-        <p className="text-sm">
-          A real-time overview of inventory, orders, and shipments
-        </p>
-      </header>
-
-      <section className="grid grid-cols-4 gap-4">
-        <div className="col-span-2">
-          <DashboardStats />
+    <section className="space-y-4">
+      <div className="space-y-6">
+        <div className="flex items-center justify-between">
+          <header className="col-span-full border-0 border-l-4 pl-2 border-l-primary">
+            <h1 className="text-sm font-semibold">Dashboard</h1>
+            <p className="text-sm">Delivery data, simplified</p>
+          </header>
         </div>
 
-        <div className="col-span-2">
-          <ShipmentStats />
+        <div className="grid gap-6 md:grid-cols-2">
+          <div className="col-span-full">
+            <TodayStats />
+          </div>
+          <StatusLineChart />
+          <TotalBarChart />
         </div>
-      </section>
-    </div>
+      </div>
+    </section>
   );
 }
