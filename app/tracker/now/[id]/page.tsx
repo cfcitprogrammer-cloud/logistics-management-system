@@ -89,7 +89,7 @@ export default function TrackerWidget() {
     pingLocation();
 
     // Set an interval to ping every 15 minutes
-    const interval = setInterval(pingLocation, 15 * 60 * 1000);
+    const interval = setInterval(pingLocation, 5 * 60 * 1000);
 
     return () => clearInterval(interval);
   }, [id]);
@@ -137,21 +137,22 @@ export default function TrackerWidget() {
   }
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100 p-4">
-      {/* Widget Container */}
-      <div className="relative w-64 h-64 bg-black rounded-2xl shadow-lg flex items-center justify-center">
-        {/* Solid center (without pulsing animation) */}
-        <div className="relative w-36 h-36 bg-gray-900 rounded-full flex flex-col items-center justify-center text-center p-4">
+    <div className="flex flex-col items-center justify-center min-h-screen p-4">
+      <div className="relative w-64 h-64 flex items-center justify-center">
+        <span className="absolute inline-flex h-40 w-40 rounded-full bg-red-700 opacity-75 animate-ping"></span>
+        <span className="absolute inline-flex h-52 w-52 rounded-full bg-red-700 opacity-50 animate-ping [animation-delay:0.75s]"></span>
+        <span className="absolute inline-flex h-64 w-64 rounded-full bg-red-700 opacity-30 animate-ping [animation-delay:1.5s]"></span>
+        {/* Center circle */}
+        <div className="relative w-36 h-36 bg-red-700 rounded-full flex flex-col items-center justify-center text-center p-4 shadow-xl">
           <span className="text-white font-semibold text-sm">
             Tracking your delivery
           </span>
-          <span className="text-gray-300 text-xs mt-1">Ping every 15 min</span>
         </div>
       </div>
 
       {/* View All Tracker IDs Button */}
-      <Button onClick={handleTrackDetailsClick} className="mt-6">
-        {loading ? "Loading..." : "See Tracking Details"}
+      <Button onClick={handleTrackDetailsClick} className="mt-6 z-10">
+        {loading ? "Loading..." : "Refresh"}
       </Button>
 
       {/* Render Tracking Details if data is available */}

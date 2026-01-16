@@ -26,6 +26,7 @@ interface NewDeliveriesDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   po: PO | null;
+  setKey: React.Dispatch<React.SetStateAction<number>>;
 }
 
 // Map picker component
@@ -50,6 +51,7 @@ export default function NewDeliveriesDialog({
   open,
   onOpenChange,
   po,
+  setKey,
 }: NewDeliveriesDialogProps) {
   const {
     register,
@@ -176,6 +178,7 @@ export default function NewDeliveriesDialog({
 
         setFromInput("");
         setToInput("");
+        setKey((prev) => prev + 1);
         toast.success("Delivery created successfully!");
         onOpenChange(false);
       } else {
