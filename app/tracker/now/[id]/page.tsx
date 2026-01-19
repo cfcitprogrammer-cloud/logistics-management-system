@@ -20,7 +20,7 @@ import { useEffect, useState } from "react";
 export default function TrackerWidget() {
   const { id } = useParams();
   const [trackingDetails, setTrackingDetails] = useState<Delivery[] | null>(
-    null
+    null,
   ); // For storing fetched data
   const [loading, setLoading] = useState(false); // Loading state
   const [showDetails, setShowDetails] = useState(false); // Control visibility of PO list
@@ -49,14 +49,14 @@ export default function TrackerWidget() {
                   "User-Agent": "YourAppName/1.0 (your@email.com)", // recommended by Nominatim
                 },
                 timeout: 5000, // timeout in case Nominatim is slow
-              }
+              },
             );
 
             address = nominatimRes.data.display_name || "";
           } catch (err) {
             console.warn(
               "Nominatim reverse geocode failed, continuing without address.",
-              err
+              err,
             );
           }
 
@@ -71,7 +71,7 @@ export default function TrackerWidget() {
                 long: longitude,
                 id,
                 lastLocation: shortenAddress(address), // may be empty if reverse geocode failed
-              })
+              }),
             );
 
             console.log("Location pinged:", latitude, longitude);
@@ -81,7 +81,7 @@ export default function TrackerWidget() {
             console.error("Failed to ping location", err);
           }
         },
-        (err) => console.error("Geolocation error", err)
+        (err) => console.error("Geolocation error", err),
       );
     };
 
@@ -131,7 +131,7 @@ export default function TrackerWidget() {
           action: "",
           path: "",
           poId,
-        })
+        }),
       );
     } catch (error) {}
   }

@@ -31,7 +31,7 @@ export default function WarehousePage() {
   return (
     <section>
       <header className="col-span-full border-0 border-l-4 pl-2 border-l-primary mb-4">
-        <h1 className="text-lg font-semibold">Warehouse</h1>
+        <h1 className="text-sm font-semibold">Warehouse</h1>
         <p className="text-sm">Inventory and logistics at a glance</p>
       </header>
       <Card>

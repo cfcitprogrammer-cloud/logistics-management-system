@@ -56,9 +56,17 @@ export default function ReadyDeliveryTable({
       }
     : null;
 
+  const filteredColumns = columns.filter((col) => {
+    const header =
+      typeof col.header === "string" ? col.header.toUpperCase() : "";
+    return header !== "ACCOUNTING APPROVAL" && header !== "WAREHOUSE APPROVAL";
+  });
+
   const table = useReactTable({
     data,
-    columns: actionColumn ? [...columns, actionColumn] : columns,
+    columns: actionColumn
+      ? [...filteredColumns, actionColumn]
+      : filteredColumns,
     getCoreRowModel: getCoreRowModel(),
     state: { rowSelection },
     onRowSelectionChange: (newSelection) => {
@@ -146,7 +154,7 @@ export default function ReadyDeliveryTable({
                     ? null
                     : flexRender(
                         header.column.columnDef.header,
-                        header.getContext()
+                        header.getContext(),
                       )}
                 </TableHead>
               ))}

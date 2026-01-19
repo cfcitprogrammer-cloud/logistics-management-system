@@ -168,7 +168,8 @@ export default function ItemDataList({
               <TableHead>Item Description</TableHead>
               <TableHead>Qty</TableHead>
               <TableHead> UOM</TableHead>
-              <TableHead className="text-right">Amount</TableHead>
+              <TableHead>Amount</TableHead>
+              <TableHead className="text-right">Total Amount</TableHead>
               <TableHead>Action</TableHead>
             </TableRow>
           </TableHeader>
@@ -181,7 +182,10 @@ export default function ItemDataList({
                 <TableCell>{item.itemDescription}</TableCell>
                 <TableCell>{item.quantity}</TableCell>
                 <TableCell>{item.unitOfMeasure}</TableCell>
-                <TableCell className="text-right">{item.unitPrice}</TableCell>
+                <TableCell>{item.unitPrice}</TableCell>
+                <TableCell className="text-right">
+                  {item.unitPrice! * item.quantity!}
+                </TableCell>
                 <TableCell className="flex gap-1">
                   <Button
                     size={"sm"}
