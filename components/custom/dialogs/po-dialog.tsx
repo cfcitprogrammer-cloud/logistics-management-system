@@ -55,7 +55,7 @@ export default function PODialog({
             action: "purchase-order",
             path: "get-po",
             id,
-          })
+          }),
         );
 
         setSidePO(response.data?.data || null);
@@ -140,7 +140,10 @@ export default function PODialog({
                         <TableHead>Item Description</TableHead>
                         <TableHead>Qty</TableHead>
                         <TableHead>UOM</TableHead>
-                        <TableHead className="text-right">Unit Price</TableHead>
+                        <TableHead>Unit Price</TableHead>
+                        <TableHead className="text-right">
+                          Total Amount
+                        </TableHead>
                       </TableRow>
                     </TableHeader>
 
@@ -152,6 +155,7 @@ export default function PODialog({
                           </TableCell>
                           <TableCell>{item.QTY}</TableCell>
                           <TableCell>{item.UOM}</TableCell>
+                          <TableCell>{item["UNIT PRICE"]}</TableCell>
                           <TableCell className="text-right">
                             ₱ {(item["UNIT PRICE"] * item.QTY).toFixed(2)}
                           </TableCell>
@@ -169,7 +173,7 @@ export default function PODialog({
                             ?.reduce(
                               (sum, item) =>
                                 sum + item.QTY * item["UNIT PRICE"],
-                              0
+                              0,
                             )
                             .toFixed(2)}
                         </TableCell>

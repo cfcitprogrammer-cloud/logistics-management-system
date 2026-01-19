@@ -72,10 +72,12 @@ function FlyToMarker({ position }: { position: [number, number] }) {
 
 interface DeliveryViewCardProps {
   selectedDelivery: Delivery | null;
+  setKey: React.Dispatch<React.SetStateAction<number>>;
 }
 
 export default function DeliveryViewCard({
   selectedDelivery,
+  setKey,
 }: DeliveryViewCardProps) {
   const [isQRDialogOpen, setIsQRDialogOpen] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -102,6 +104,7 @@ export default function DeliveryViewCard({
 
       if (res.data?.success) {
         toast.success(`Marked as ${status.toUpperCase()}`);
+        setKey((prev) => prev + 1);
       } else {
         toast.error("Failed to update status");
       }

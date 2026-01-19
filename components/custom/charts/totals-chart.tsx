@@ -11,8 +11,15 @@ import {
   ResponsiveContainer,
   CartesianGrid,
 } from "recharts";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardContent,
+  CardDescription,
+} from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import CustomTooltip from "../tooltips/custom-tooltip";
 
 type Mode = "week" | "year";
 
@@ -98,7 +105,12 @@ export function TotalBarChart() {
   return (
     <Card>
       <CardHeader className="flex flex-col md:flex-row md:justify-between md:items-center gap-2">
-        <CardTitle>Total Deliveries</CardTitle>
+        <div>
+          <CardTitle>Total Deliveries</CardTitle>
+          <CardDescription>
+            Shows the total count of completed deliveries.
+          </CardDescription>
+        </div>
 
         {/* Tabs inside chart */}
         <Tabs value={mode} onValueChange={(v) => setMode(v as Mode)}>
@@ -134,7 +146,7 @@ export function TotalBarChart() {
                 hide
               />
 
-              <Tooltip cursor={false} />
+              <Tooltip cursor={false} content={<CustomTooltip />} />
 
               <Bar dataKey="Total" fill="#6366f1" radius={[4, 4, 0, 0]} />
             </BarChart>

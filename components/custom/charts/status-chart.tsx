@@ -10,9 +10,16 @@ import {
   ResponsiveContainer,
   CartesianGrid,
 } from "recharts";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardContent,
+  CardDescription,
+} from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ChartData } from "@/db/types/chart-data";
+import CustomTooltip from "../tooltips/custom-tooltip";
 
 type Mode = "week" | "year";
 
@@ -98,7 +105,12 @@ export function StatusLineChart() {
   return (
     <Card>
       <CardHeader className="flex flex-col md:flex-row md:justify-between md:items-center gap-2">
-        <CardTitle>Status Trend</CardTitle>
+        <div>
+          <CardTitle>Status Trend</CardTitle>
+          <CardDescription>
+            Displays changes in item status over time
+          </CardDescription>
+        </div>
 
         <Tabs value={mode} onValueChange={(v) => setMode(v as Mode)}>
           <TabsList>
@@ -125,11 +137,11 @@ export function StatusLineChart() {
               />
 
               {/* Hidden axes (used only for scaling) */}
-              <XAxis dataKey="name" />
+              <XAxis dataKey="name" padding={{ left: 8 }} />
               <YAxis hide allowDecimals={false} tickCount={20} />
 
               {/* Tooltip without hover line */}
-              <Tooltip cursor={false} />
+              <Tooltip cursor={false} content={<CustomTooltip />} />
 
               {/* Areas */}
               <Area

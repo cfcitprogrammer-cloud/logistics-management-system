@@ -49,7 +49,7 @@ export default function PurchaseOrdersPage() {
           path: dept,
           status,
           id,
-        })
+        }),
       );
 
       console.log(res);
@@ -77,7 +77,7 @@ export default function PurchaseOrdersPage() {
           action: "purchase-order",
           path: "cancel",
           id,
-        })
+        }),
       );
 
       console.log(res);
@@ -101,7 +101,7 @@ export default function PurchaseOrdersPage() {
       )}
 
       <header className="col-span-full border-0 border-l-4 pl-2 border-l-primary mb-4">
-        <h1 className="text-lg font-semibold">Purchase Orders</h1>
+        <h1 className="text-sm font-semibold">Purchase Orders</h1>
         <p className="text-sm">
           Monitor procurement, approvals, and order status in real time
         </p>

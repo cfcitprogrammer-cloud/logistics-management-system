@@ -20,7 +20,7 @@ import { useEffect, useState } from "react";
 export default function TrackerWidget() {
   const { id } = useParams();
   const [trackingDetails, setTrackingDetails] = useState<Delivery[] | null>(
-    null
+    null,
   ); // For storing fetched data
   const [loading, setLoading] = useState(false); // Loading state
   const [showDetails, setShowDetails] = useState(false); // Control visibility of PO list
@@ -49,14 +49,14 @@ export default function TrackerWidget() {
                   "User-Agent": "YourAppName/1.0 (your@email.com)", // recommended by Nominatim
                 },
                 timeout: 5000, // timeout in case Nominatim is slow
-              }
+              },
             );
 
             address = nominatimRes.data.display_name || "";
           } catch (err) {
             console.warn(
               "Nominatim reverse geocode failed, continuing without address.",
-              err
+              err,
             );
           }
 
@@ -71,7 +71,7 @@ export default function TrackerWidget() {
                 long: longitude,
                 id,
                 lastLocation: shortenAddress(address), // may be empty if reverse geocode failed
-              })
+              }),
             );
 
             console.log("Location pinged:", latitude, longitude);
@@ -81,7 +81,7 @@ export default function TrackerWidget() {
             console.error("Failed to ping location", err);
           }
         },
-        (err) => console.error("Geolocation error", err)
+        (err) => console.error("Geolocation error", err),
       );
     };
 
@@ -89,7 +89,7 @@ export default function TrackerWidget() {
     pingLocation();
 
     // Set an interval to ping every 15 minutes
-    const interval = setInterval(pingLocation, 15 * 60 * 1000);
+    const interval = setInterval(pingLocation, 5 * 60 * 1000);
 
     return () => clearInterval(interval);
   }, [id]);
@@ -131,27 +131,28 @@ export default function TrackerWidget() {
           action: "",
           path: "",
           poId,
-        })
+        }),
       );
     } catch (error) {}
   }
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100 p-4">
-      {/* Widget Container */}
-      <div className="relative w-64 h-64 bg-black rounded-2xl shadow-lg flex items-center justify-center">
-        {/* Solid center (without pulsing animation) */}
-        <div className="relative w-36 h-36 bg-gray-900 rounded-full flex flex-col items-center justify-center text-center p-4">
+    <div className="flex flex-col items-center justify-center min-h-screen p-4">
+      <div className="relative w-64 h-64 flex items-center justify-center">
+        <span className="absolute inline-flex h-40 w-40 rounded-full bg-red-700 opacity-75 animate-ping"></span>
+        <span className="absolute inline-flex h-52 w-52 rounded-full bg-red-700 opacity-50 animate-ping [animation-delay:0.75s]"></span>
+        <span className="absolute inline-flex h-64 w-64 rounded-full bg-red-700 opacity-30 animate-ping [animation-delay:1.5s]"></span>
+        {/* Center circle */}
+        <div className="relative w-36 h-36 bg-red-700 rounded-full flex flex-col items-center justify-center text-center p-4 shadow-xl">
           <span className="text-white font-semibold text-sm">
             Tracking your delivery
           </span>
-          <span className="text-gray-300 text-xs mt-1">Ping every 15 min</span>
         </div>
       </div>
 
       {/* View All Tracker IDs Button */}
-      <Button onClick={handleTrackDetailsClick} className="mt-6">
-        {loading ? "Loading..." : "See Tracking Details"}
+      <Button onClick={handleTrackDetailsClick} className="mt-6 z-10">
+        {loading ? "Loading..." : "Refresh"}
       </Button>
 
       {/* Render Tracking Details if data is available */}

@@ -36,7 +36,11 @@ export default function DispatchDeliveryQRDialog({
         </p>
 
         <div className="bg-background p-4 rounded mb-4 flex justify-center">
-          <QRCode value={trackingId} size={220} level="H" />
+          <QRCode
+            value={`${window.location.origin}/tracker/now/${trackingId}`}
+            size={220}
+            level="H"
+          />
         </div>
 
         <div className="text-sm text-center space-y-1 mb-4">
@@ -44,12 +48,23 @@ export default function DispatchDeliveryQRDialog({
             <strong>Tracking ID:</strong> {trackingId}
             <Button
               variant={"ghost"}
+              className="outline-0"
               size={"sm"}
               onClick={() => copyToClipboard(trackingId || "")}
             >
               <Copy />
             </Button>
           </p>
+
+          <Button
+            onClick={() =>
+              copyToClipboard(
+                `${window.location.origin}/tracker/now/${trackingId}` || ""
+              )
+            }
+          >
+            Copy Link
+          </Button>
         </div>
 
         <DialogClose className="mt-2 w-full rounded bg-primary px-4 py-2 text-white">
