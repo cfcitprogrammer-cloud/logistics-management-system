@@ -2,10 +2,10 @@ import { ColumnDef } from "@tanstack/react-table";
 import { Delivery } from "@/db/types/delivery";
 import { shortenAddress } from "@/lib/address";
 
-export const warehouseColumns: ColumnDef<Delivery>[] = [
+export const deliveryColumns: ColumnDef<Delivery>[] = [
   {
-    accessorKey: "PO ID",
-    header: "PO ID",
+    accessorKey: "PO NUMBER",
+    header: "PO Number",
     cell: (info) => info.getValue(),
   },
   {

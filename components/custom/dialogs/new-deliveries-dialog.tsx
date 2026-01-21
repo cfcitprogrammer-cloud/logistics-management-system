@@ -21,6 +21,8 @@ import axios from "axios";
 import { MapContainer, TileLayer, Marker, useMapEvents } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import { toast } from "sonner";
+import { genTrackingId } from "@/lib/utils";
+import { Dices } from "lucide-react";
 
 interface NewDeliveriesDialogProps {
   open: boolean;
@@ -116,8 +118,8 @@ export default function NewDeliveriesDialog({
     try {
       const res = await fetch(
         `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(
-          value
-        )}&format=jsonv2&addressdetails=1&limit=5`
+          value,
+        )}&format=jsonv2&addressdetails=1&limit=5`,
       );
       const data = await res.json();
       if (type === "from") setFromSuggestions(data);
@@ -145,7 +147,7 @@ export default function NewDeliveriesDialog({
     const payload = {
       action: "deliveries",
       path: "create",
-      poId: po.ID,
+      poNumber: po["PO NUMBER"],
       fromLocation: values.fromLocation,
       toLocation: values.toLocation,
       fromLat: values.fromLat,
@@ -160,7 +162,7 @@ export default function NewDeliveriesDialog({
     try {
       const response = await axios.post(
         process.env.NEXT_PUBLIC_GAS_LINK || "",
-        JSON.stringify(payload)
+        JSON.stringify(payload),
       );
 
       if (response.data?.success) {
@@ -226,8 +228,8 @@ export default function NewDeliveriesDialog({
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             {/* PO ID */}
             <div className="space-y-1">
-              <Label>PO ID</Label>
-              <Input value={po.ID} disabled />
+              <Label>PO NUMBER</Label>
+              <Input value={po["PO NUMBER"]} disabled />
             </div>
 
             {/* Hidden fields for coordinates */}
@@ -444,11 +446,20 @@ export default function NewDeliveriesDialog({
             {/* Tracking ID */}
             <div className="space-y-1">
               <Label htmlFor="trackingId">Tracking ID</Label>
-              <Input
-                id="trackingId"
-                placeholder="Optional"
-                {...register("trackingId")}
-              />
+              <div className="flex gap-2">
+                <Input
+                  id="trackingId"
+                  placeholder="Optional"
+                  {...register("trackingId")}
+                />
+                <Button
+                  type="button"
+                  variant={"ghost"}
+                  onClick={() => setValue("trackingId", genTrackingId())}
+                >
+                  <Dices />
+                </Button>
+              </div>
             </div>
 
             <DialogFooter>

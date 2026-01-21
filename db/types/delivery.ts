@@ -1,6 +1,6 @@
 export type Delivery = {
   ID: string;
-  "PO ID": string;
+  "PO NUMBER": string;
   "LAST LOCATION": string;
   "DELIVERY DATE": number; // timestamp or number representation of date
   "DELIVERY ADDRESS": string;
