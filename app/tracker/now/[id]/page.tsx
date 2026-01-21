@@ -162,7 +162,7 @@ export default function TrackerWidget() {
           {trackingDetails.map((item, index) => (
             <Card key={index}>
               <CardHeader>
-                <CardTitle>#{item["PO ID"]}</CardTitle>
+                <CardTitle>#{item["PO NUMBER"]}</CardTitle>
                 <CardDescription>
                   <Badge>{item.STATUS}</Badge>
                 </CardDescription>

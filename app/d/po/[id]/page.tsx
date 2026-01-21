@@ -54,7 +54,7 @@ export default function PurchaseOrderPage() {
           path: dept,
           status,
           id,
-        })
+        }),
       );
 
       if (res.data.status) {
@@ -86,7 +86,7 @@ export default function PurchaseOrderPage() {
             action: "purchase-order",
             path: "get-po",
             id,
-          })
+          }),
         );
 
         setPO(response.data?.data || null);
@@ -233,7 +233,7 @@ export default function PurchaseOrderPage() {
                   {po.items
                     .reduce(
                       (sum, item) => sum + item.QTY * item["UNIT PRICE"],
-                      0
+                      0,
                     )
                     .toFixed(2)}
                 </TableCell>
@@ -248,32 +248,39 @@ export default function PurchaseOrderPage() {
       </CardContent>
 
       <CardFooter className="flex-col gap-2">
-        <p>Set Status</p>
-        <div className="flex justify-center gap-2 w-full">
-          <Button
-            variant="default"
-            size="sm"
-            onClick={() => setStatus(role!, "APPROVED", id)}
-          >
-            Approve
-          </Button>
+        {po["ACCOUNTING APPROVAL"] == "CANCELLED" ||
+        po["WAREHOUSE APPROVAL"] == "CANCELLED" ? (
+          <p className="text-xs font-semibold">Purchase Order is cancelled</p>
+        ) : (
+          <div>
+            <p>Set Status</p>
+            <div className="flex justify-center gap-2 w-full">
+              <Button
+                variant="default"
+                size="sm"
+                onClick={() => setStatus(role!, "APPROVED", id)}
+              >
+                Approve
+              </Button>
 
-          <Button
-            variant="destructive"
-            size="sm"
-            onClick={() => setStatus(role!, "REJECTED", id)}
-          >
-            Reject
-          </Button>
+              <Button
+                variant="destructive"
+                size="sm"
+                onClick={() => setStatus(role!, "REJECTED", id)}
+              >
+                Reject
+              </Button>
 
-          <Button
-            variant="secondary"
-            size="sm"
-            onClick={() => setStatus(role!, "PENDING", id)}
-          >
-            Pending
-          </Button>
-        </div>
+              <Button
+                variant="secondary"
+                size="sm"
+                onClick={() => setStatus(role!, "PENDING", id)}
+              >
+                Pending
+              </Button>
+            </div>
+          </div>
+        )}
       </CardFooter>
     </Card>
   );

@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/card";
 import { Delivery } from "@/db/types/delivery";
 import DeliveryTable from "@/components/custom/tables/Deliveries-table";
-import { warehouseColumns } from "@/components/custom/columns/delivery-column";
+import { deliveryColumns } from "@/components/custom/columns/delivery-column";
 import { columns } from "@/components/custom/columns/po-column";
 import ReadyDeliveryTable from "@/components/custom/tables/ReadyDelivery-table";
 import { PO } from "@/db/types/po";
@@ -142,7 +142,7 @@ export default function DeliveriesPage() {
         <CardContent>
           <DeliveryTable
             key={key}
-            columns={warehouseColumns}
+            columns={deliveryColumns}
             onSelect={setSelectedDelivery}
           />
         </CardContent>

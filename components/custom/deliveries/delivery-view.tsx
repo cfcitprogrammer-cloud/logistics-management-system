@@ -99,7 +99,7 @@ export default function DeliveryViewCard({
           path: "update-status",
           id: selectedDelivery?.ID,
           status,
-        })
+        }),
       );
 
       if (res.data?.success) {
@@ -177,7 +177,11 @@ export default function DeliveryViewCard({
       <CardContent className="space-y-4">
         {/* Map */}
         <figure>
-          {!selectedDelivery.LAT || !selectedDelivery.LONG ? (
+          {selectedDelivery.STATUS.toUpperCase() === "DELIVERED" ? (
+            <div className="w-full h-64 bg-primary flex justify-center items-center">
+              <p className="text-primary-foreground">Delivered</p>
+            </div>
+          ) : !selectedDelivery.LAT || !selectedDelivery.LONG ? (
             <div className="w-full h-64 bg-primary flex justify-center items-center">
               <p className="text-primary-foreground">Not Tracking Yet</p>
             </div>
@@ -204,7 +208,7 @@ export default function DeliveryViewCard({
                 ]}
                 icon={createPingMarker()}
               >
-                <Popup>Current Location</Popup>
+                <Popup>Pickup Location</Popup>
               </Marker>
             </MapContainer>
           )}
@@ -217,8 +221,8 @@ export default function DeliveryViewCard({
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
             <div>
-              <h3 className="font-semibold">PO ID</h3>
-              <p>{selectedDelivery["PO ID"]}</p>
+              <h3 className="font-semibold">PO NUMBER</h3>
+              <p>{selectedDelivery["PO NUMBER"]}</p>
             </div>
 
             <div>
@@ -244,7 +248,7 @@ export default function DeliveryViewCard({
                     </p>
                     <p className="text-xs">
                       {formatDateTime(
-                        selectedDelivery["DELIVERY DATE"].toString()
+                        selectedDelivery["DELIVERY DATE"].toString(),
                       )}
                     </p>
                   </div>
@@ -261,7 +265,7 @@ export default function DeliveryViewCard({
                     </p>
                     <p className="text-xs">
                       {formatDateTime(
-                        selectedDelivery["DELIVERY DATETIME"] || ""
+                        selectedDelivery["DELIVERY DATETIME"] || "",
                       ) || selectedDelivery.STATUS}
                     </p>
                   </div>

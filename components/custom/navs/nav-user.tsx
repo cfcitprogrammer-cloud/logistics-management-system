@@ -23,6 +23,7 @@ import { auth } from "@/lib/firebase";
 import { signOut, User } from "firebase/auth";
 import { generateIdenteapot } from "@teapotlabs/identeapots";
 import { useRouter } from "next/navigation";
+import { useAuthGuard } from "@/hooks/use-auth";
 
 export function NavUser() {
   const { isMobile } = useSidebar();
@@ -31,12 +32,14 @@ export function NavUser() {
 
   const router = useRouter();
 
+  const { role } = useAuthGuard();
+
   useEffect(() => {
     if (user != null) {
       async function createIdenticon() {
         // simulate async generation, e.g., if future versions support promises
         const result = await Promise.resolve(
-          generateIdenteapot(user?.email!, "26tyqgevwadguf")
+          generateIdenteapot(user?.email!, "26tyqgevwadguf"),
         );
         setIdenticon(result);
       }
@@ -113,6 +116,11 @@ export function NavUser() {
               </div>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
+            <DropdownMenuItem>
+              <p>
+                <strong>Department: </strong> {role}
+              </p>
+            </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={logOut}>
               <LogOut />
